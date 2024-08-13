@@ -2,9 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:god_king_castle_calculator/character.dart';
 import 'package:god_king_castle_calculator/data.dart';
 import 'package:god_king_castle_calculator/relic.dart';
+import 'package:god_king_castle_calculator/widget/character_stats.dart';
 
 void main() {
   runApp(const MyApp());
+}
+
+class _StatsSummary {
+  final String summary;
+  final Stats stats;
+
+  const _StatsSummary(this.summary, this.stats);
 }
 
 class MyApp extends StatelessWidget {
@@ -13,9 +21,9 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    LinkingCharacter luna = characters[CharacterName.lunaire] as LinkingCharacter;
-    Character saras = characters[CharacterName.saras]!;
-    //saras = saras.ofTier(Tier.T2);
+    LinkingCharacter supportCharacter = characters[CharacterName.lunaire] as LinkingCharacter;
+    Character mainCharacter = characters[CharacterName.saras]!;
+    //mainCharacter = mainCharacter.ofTier(Tier.T2);
 
     // Experiments
     const facilityAttackBonusRatio = 0.4;
@@ -24,20 +32,46 @@ class MyApp extends StatelessWidget {
 
     const accessoriesAttackBonusRatio = 0.1; // unknown delta. Presuming
 
-    const sarasAttackBonusRatio = (1 + barbarianSetAttackBonusRatio + facilityAttackBonusRatio + hammerLegacyAttackBonusRatio + accessoriesAttackBonusRatio);
+    const sarasAttackBonusRatio = (1 +
+        barbarianSetAttackBonusRatio +
+        facilityAttackBonusRatio +
+        hammerLegacyAttackBonusRatio +
+        accessoriesAttackBonusRatio);
 
     // factial: 205
-    //print(luna.getStats().attack * (1 + barbarianSetAttackBonusRatio + facilityAttackBonusRatio));
+    //print(supportCharacter.getStats().attack * (1 + barbarianSetAttackBonusRatio + facilityAttackBonusRatio));
     // factial: 444
-    //print(saras.getStats().attack * sarasAttackBonusRatio);
+    //print(mainCharacter.getStats().attack * sarasAttackBonusRatio);
 
     // buffed 752(444+308) att, 141(57+84) sp
 
     // end experiments
-    //luna = luna.ofTier(Tier.T7);
-
+    //supportCharacter = supportCharacter.ofTier(Tier.T7);
 
     Relic perpetualVoid = relics[RelicName.perpetualVoid]!;
+
+    const allTiers = Tier.values;
+
+    List<List<_StatsSummary>> summary = List.generate(9, (index) => []);
+
+    int row = 0;
+    for (Character character in [mainCharacter, supportCharacter]) {
+      for (Tier tier in allTiers) {
+        var char = character.ofTier(tier);
+        summary[row].add(_StatsSummary("${char.tier.name} ${char.name}", char.getStats()));
+      }
+      row++;
+    }
+
+    for (Tier tierChar1 in allTiers) {
+      var char1 = mainCharacter.ofTier(tierChar1);
+      for (Tier tierChar2 in allTiers) {
+        var char2 = supportCharacter.ofTier(tierChar2);
+        var buffedStats = char2.buff(char1);
+        summary[row].add(_StatsSummary("${char1.tier.name} ${char1.name}(${char2.tier.name} ${char2.name})", buffedStats));
+      }
+      row++;
+    }
 
     return MaterialApp(
       title: 'KGC Calculator',
@@ -61,44 +95,24 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: Scaffold(
-          appBar: AppBar(
-            title: Text("King God Castle Calculator"),
-          ),
-          body: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              StatsWidget("${luna.tier.name} ${luna.name}", luna.getStats()),
-              StatsWidget("${saras.tier.name} ${saras.name}", saras.getStats()),
-              StatsWidget("${luna.tier.name} ${luna.name} + ${saras.tier.name} ${saras.name}", luna.buff(saras)),
-              // TODO relic must apply to buffer too...
-              //StatsWidget("${luna.tier.name} ${luna.name} + ${saras.tier.name} ${saras.name} + PVoid(1 stack)", perpetualVoid.applyTo(luna.applyLink(saras), stacks: 1)),
-              //StatsWidget("${luna.tier.name} ${luna.name} + ${saras.tier.name} ${saras.name} + PVoid(2 stack)", perpetualVoid.applyTo(luna.applyLink(saras), stacks: 2)),
-            ],
-          )
-          //home: const MyHomePage(title: 'Flutter Demo Home Page'),
-          ),
-    );
-  }
-}
+        appBar: AppBar(
+          title: const Text("King God Castle Calculator"),
+        ),
+        body: Column(
+            children: List.generate(summary.length, (int index) {
+          List<_StatsSummary> statsSummary = summary[index];
+          return Expanded(
+              child: GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 7),
+                  padding: const EdgeInsets.all(8),
+                  itemCount: statsSummary.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    _StatsSummary statSummary = statsSummary[index];
 
-class StatsWidget extends StatelessWidget {
-  final String summary;
-  final Stats stats;
-
-  const StatsWidget(this.summary, this.stats, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        children: [
-          Text(summary),
-          Text("Health: ${stats.hp}"),
-          Text("Spell power: ${stats.spellPower}"),
-          Text("Attack: ${stats.attack}"),
-          Text("Attack speed : ${stats.attackSpeed}%"),
-        ],
-      ),
+                    return StatsWidget(statSummary.summary, statSummary.stats);
+                  }));
+        })),
+      ), //home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
