@@ -5,6 +5,7 @@ enum CharacterName {
   lunaire,
   saras,
   lyca,
+  hansi,
 }
 
 const lunaireBoost = [
@@ -19,6 +20,8 @@ const Map<CharacterName, Character> characters = {
   CharacterName.lunaire: LinkingCharacter("Lunaire", BaseStats(885, 89, 89, 100), Tier.T1, lunaireBoost),
   CharacterName.saras: Character("Saras", BaseStats(885, 148, 41, 100), Tier.T1),
   CharacterName.lyca: Character("Lyca", BaseStats(826, 118, 177, 125), Tier.T1),
+  //CharacterName.hansi: Character("Hansi", BaseStats(885, 47, 0, 125), Tier.T1), // lvl20
+  CharacterName.hansi: Character("Hansi", BaseStats(750, 40, 0, 125, attackCount: 2), Tier.T1), // lvl17
 };
 
 enum RelicName {

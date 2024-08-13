@@ -13,10 +13,12 @@ class StatsWidget extends StatelessWidget {
       child: Column(
         children: [
           Text(summary),
-          //Text("Health: ${stats.hp}"),
+          Text("Health: ${stats.hp}"),
           Text("Attack: ${stats.attack}"),
           Text("Spell power: ${stats.spellPower}"),
           //Text("Attack speed : ${stats.attackSpeed}%"),
+          // TODO DPS is very complex thing. Implementing proper calculation takes effort of implementing the game itself :D
+          //Text("DPS : ${((stats.attackSpeed/100) * stats.attack * stats.attackCount).round()}"),
         ],
       ),
     );

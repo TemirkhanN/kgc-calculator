@@ -31,8 +31,9 @@ class BaseStats {
   final int attack;
   final int spellPower;
   final int attackSpeed;
+  final int attackCount;
 
-  const BaseStats(this.hp, this.attack, this.spellPower, this.attackSpeed);
+  const BaseStats(this.hp, this.attack, this.spellPower, this.attackSpeed, {this.attackCount = 1});
 }
 
 class Stats {
@@ -40,12 +41,13 @@ class Stats {
   final int attack;
   final int spellPower;
   final int attackSpeed;
+  final int attackCount;
 
   final BaseStats baseStats;
 
-  const Stats(this.hp, this.attack, this.spellPower, this.attackSpeed, this.baseStats);
+  const Stats(this.hp, this.attack, this.spellPower, this.attackSpeed, this.baseStats, {this.attackCount = 1});
 
-  Stats.unaffected(BaseStats baseStats): this(baseStats.hp, baseStats.attack, baseStats.spellPower, baseStats.attackSpeed, baseStats);
+  Stats.unaffected(BaseStats baseStats): this(baseStats.hp, baseStats.attack, baseStats.spellPower, baseStats.attackSpeed, baseStats, attackCount: baseStats.attackCount);
 }
 
 enum SkillTier { T1, T2, T3, T4 }
@@ -69,7 +71,8 @@ extension TierExtension on Tier {
       statModifier.apply(baseStats.hp),
       statModifier.apply(baseStats.attack),
       statModifier.apply(baseStats.spellPower),
-      attackSpeedModifier.apply(baseStats.attackSpeed)
+      attackSpeedModifier.apply(baseStats.attackSpeed),
+      attackCount: baseStats.attackCount
     );
   }
 
@@ -172,9 +175,11 @@ class LinkBuff {
   Stats calculate(Stats myStats, Stats targetStats) {
     Stats bonusStats = _statBooster.boost(myStats);
 
+    var attackBonus = (bonusStats.attack/targetStats.attackCount).ceil();
+
     return Stats(
         targetStats.hp,
-        targetStats.attack + bonusStats.attack,
+        targetStats.attack + attackBonus,
         targetStats.spellPower + bonusStats.spellPower,
         targetStats.attackSpeed,
         targetStats.baseStats

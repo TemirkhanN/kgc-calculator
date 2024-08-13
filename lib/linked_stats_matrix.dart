@@ -13,20 +13,20 @@ class StatsSummary {
 class StatsMatrix {
   final LinkingCharacter support;
   final Character main;
+  final int dimension = 8;
 
-  const StatsMatrix(this.main, this.support);
+  late final List<List<StatsSummary?>> summary;
 
-  List<List<StatsSummary?>> build () {
+  StatsMatrix(this.main, this.support) {
     const allTiers = Tier.values;
-    const dimension = 8;
 
-    List<List<StatsSummary?>> result = List.generate(dimension, (i) => List.filled(dimension, null));
+    summary = List.generate(dimension, (i) => List.filled(dimension, null));
 
     LoopValue column = LoopValue(1, dimension);
     LoopValue row = LoopValue(1, dimension);
     for (Tier tier in allTiers) {
-      result[0][column.current()] = StatsSummary.forChar(support.ofTier(tier));
-      result[row.current()][0] = StatsSummary.forChar(main.ofTier(tier));
+      summary[0][column.current()] = StatsSummary.forChar(support.ofTier(tier));
+      summary[row.current()][0] = StatsSummary.forChar(main.ofTier(tier));
       column.next();
       row.next();
     }
@@ -38,13 +38,11 @@ class StatsMatrix {
         var char1 = main.ofTier(tierChar1);
         var char2 = support.ofTier(tierChar2);
         var buffedStats = char2.buff(char1);
-        result[row.current()][column.current()] = StatsSummary("", buffedStats);
+        summary[row.current()][column.current()] = StatsSummary("", buffedStats);
         column.next();
       }
       row.next();
     }
-
-    return result;
   }
 }
 
