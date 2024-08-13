@@ -3,7 +3,8 @@ import 'package:god_king_castle_calculator/relic.dart';
 
 enum CharacterName {
   lunaire,
-  saras
+  saras,
+  lyca,
 }
 
 const lunaireBoost = [
@@ -17,6 +18,7 @@ const lunaireBoost = [
 const Map<CharacterName, Character> characters = {
   CharacterName.lunaire: LinkingCharacter("Lunaire", BaseStats(885, 89, 89, 100), Tier.T1, lunaireBoost),
   CharacterName.saras: Character("Saras", BaseStats(885, 148, 41, 100), Tier.T1),
+  CharacterName.lyca: Character("Lyca", BaseStats(826, 118, 177, 125), Tier.T1),
 };
 
 enum RelicName {
@@ -26,3 +28,5 @@ enum RelicName {
 const Map<RelicName, Relic> relics = {
   RelicName.perpetualVoid: Relic.createStacking("Perpetual Void", StatBooster(RatioModifier(0.4), RatioModifier(0.4)), 5),
 };
+
+// confirmed S1L1, S1L2, S2L1, S2L2, S3L1, S3L3

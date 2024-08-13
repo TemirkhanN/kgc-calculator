@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LinkingCharacter supportCharacter = characters[CharacterName.lunaire] as LinkingCharacter;
-    Character mainCharacter = characters[CharacterName.saras]!;
+    Character mainCharacter = characters[CharacterName.lyca]!;
     //mainCharacter = mainCharacter.ofTier(Tier.T2);
 
     // Experiments

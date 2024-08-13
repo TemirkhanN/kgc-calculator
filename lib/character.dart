@@ -192,10 +192,10 @@ class LinkingCharacter extends Character {
     return LinkingCharacter(name, baseStats, tier, _linkBuff);
   }
 
-  // We presume that Character always has highest level of 20.
   Stats buff(Character target) {
     LinkBuff buff = _linkBuff.firstWhere((boost) => boost.skillTier == tier.toSkillTier());
 
+    // We presume that Character always has highest level of 20.
     BaseStats myBaseStats = tier.applyToStats(target.baseStats);
     Stats myStats = Stats.unaffected(myBaseStats);
     Stats targetStats = target.getStats();
