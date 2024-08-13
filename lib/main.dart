@@ -1,18 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:god_king_castle_calculator/character.dart';
 import 'package:god_king_castle_calculator/data.dart';
+import 'package:god_king_castle_calculator/linked_stats_matrix.dart';
 import 'package:god_king_castle_calculator/relic.dart';
 import 'package:god_king_castle_calculator/widget/character_stats.dart';
 
 void main() {
   runApp(const MyApp());
-}
-
-class _StatsSummary {
-  final String summary;
-  final Stats stats;
-
-  const _StatsSummary(this.summary, this.stats);
 }
 
 class MyApp extends StatelessWidget {
@@ -50,28 +44,7 @@ class MyApp extends StatelessWidget {
 
     Relic perpetualVoid = relics[RelicName.perpetualVoid]!;
 
-    const allTiers = Tier.values;
-
-    List<List<_StatsSummary>> summary = List.generate(9, (index) => []);
-
-    int row = 0;
-    for (Character character in [mainCharacter, supportCharacter]) {
-      for (Tier tier in allTiers) {
-        var char = character.ofTier(tier);
-        summary[row].add(_StatsSummary("${char.tier.name} ${char.name}", char.getStats()));
-      }
-      row++;
-    }
-
-    for (Tier tierChar1 in allTiers) {
-      var char1 = mainCharacter.ofTier(tierChar1);
-      for (Tier tierChar2 in allTiers) {
-        var char2 = supportCharacter.ofTier(tierChar2);
-        var buffedStats = char2.buff(char1);
-        summary[row].add(_StatsSummary("${char1.tier.name} ${char1.name}(${char2.tier.name} ${char2.name})", buffedStats));
-      }
-      row++;
-    }
+    List<List<StatsSummary?>> summary = StatsMatrix(mainCharacter, supportCharacter).build();
 
     return MaterialApp(
       title: 'KGC Calculator',
@@ -100,14 +73,19 @@ class MyApp extends StatelessWidget {
         ),
         body: Column(
             children: List.generate(summary.length, (int index) {
-          List<_StatsSummary> statsSummary = summary[index];
-          return Expanded(
+          List<StatsSummary?> statsSummary = summary[index];
+          return Flexible(
               child: GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 7),
-                  padding: const EdgeInsets.all(8),
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 8),
                   itemCount: statsSummary.length,
                   itemBuilder: (BuildContext context, int index) {
-                    _StatsSummary statSummary = statsSummary[index];
+                    StatsSummary? statSummary = statsSummary[index];
+
+                    if (statSummary == null) {
+                      return const Text("/");
+                    }
 
                     return StatsWidget(statSummary.summary, statSummary.stats);
                   }));

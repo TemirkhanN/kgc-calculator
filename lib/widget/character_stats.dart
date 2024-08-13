@@ -13,12 +13,13 @@ class StatsWidget extends StatelessWidget {
       child: Column(
         children: [
           Text(summary),
-          Text("Health: ${stats.hp}"),
+          //Text("Health: ${stats.hp}"),
           Text("Attack: ${stats.attack}"),
           Text("Spell power: ${stats.spellPower}"),
-          Text("Attack speed : ${stats.attackSpeed}%"),
+          //Text("Attack speed : ${stats.attackSpeed}%"),
         ],
       ),
     );
   }
 }
+
