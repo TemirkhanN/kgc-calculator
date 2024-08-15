@@ -13,30 +13,27 @@ class LinkStatBuffCalculator extends StatelessWidget {
   Widget build(BuildContext context) {
     StatsMatrix statsMatrix = StatsMatrix(_main, _support);
 
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("King God Castle Calculator"),
       ),
-      body: Column(
-          children: List.generate(statsMatrix.dimension, (int index) {
-            List<StatsSummary?> statsSummary = statsMatrix.summary[index];
-            return Flexible(
-                child: GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: statsMatrix.dimension),
-                    itemCount: statsSummary.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      StatsSummary? statSummary = statsSummary[index];
+      body: GridView.builder(
+          shrinkWrap: true,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: statsMatrix.dimension),
+          itemCount: statsMatrix.dimension * statsMatrix.dimension,
+          itemBuilder: (BuildContext context, int index) {
+            int row = (index/statsMatrix.dimension).floor();
+            int col = index % statsMatrix.dimension;
 
-                      if (statSummary == null) {
-                        return const Text("/");
-                      }
+            StatsSummary? statSummary = statsMatrix.summary[row][col];
 
-                      return StatsWidget(statSummary.summary, statSummary.stats);
-                    }));
-          })),
+            if (statSummary == null) {
+              return const Text("/");
+            }
+
+            return StatsWidget(statSummary.summary, statSummary.stats);
+          }),
     );
   }
-
 }
