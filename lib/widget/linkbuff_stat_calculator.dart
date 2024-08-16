@@ -27,7 +27,6 @@ class LinkStatBuffCalculator extends StatelessWidget {
             int col = index % statsMatrix.dimension;
 
             StatsSummary? statSummary = statsMatrix.summary[row][col];
-
             if (statSummary == null) {
               return const Text("/");
             }
