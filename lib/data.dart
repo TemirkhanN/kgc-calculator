@@ -21,7 +21,7 @@ const Map<CharacterName, Character> characters = {
   CharacterName.saras: Character("Saras", BaseStats(885, 148, 41, 100), Tier.T1),
   CharacterName.lyca: Character("Lyca", BaseStats(826, 118, 177, 125), Tier.T1),
   //CharacterName.hansi: Character("Hansi", BaseStats(885, 47, 0, 125), Tier.T1), // lvl20
-  CharacterName.hansi: Character("Hansi", BaseStats(750, 40, 0, 125, attackCount: 2), Tier.T1), // lvl17
+  CharacterName.hansi: Character("Hansi", BaseStats(750, 68, 0, 125, attackCount: 1), Tier.T1), // lvl17
 };
 
 enum RelicName {
