@@ -1,11 +1,17 @@
 import 'package:god_king_castle_calculator/character.dart';
 import 'package:god_king_castle_calculator/relic.dart';
 
-enum CharacterName {
+enum CharacterId {
   lunaire,
   saras,
   lyca,
   hansi,
+}
+
+extension CharacterDiscovery on CharacterId {
+  Character get() {
+    return characters[this]!;
+  }
 }
 
 const lunaireBoost = [
@@ -16,12 +22,11 @@ const lunaireBoost = [
 ];
 
 // Considering all chars are lvl20
-const Map<CharacterName, Character> characters = {
-  CharacterName.lunaire: LinkingCharacter("Lunaire", BaseStats(885, 89, 89, 100), Tier.T1, lunaireBoost),
-  CharacterName.saras: Character("Saras", BaseStats(885, 148, 41, 100), Tier.T1),
-  CharacterName.lyca: Character("Lyca", BaseStats(826, 118, 177, 125), Tier.T1),
-  //CharacterName.hansi: Character("Hansi", BaseStats(885, 47, 0, 125), Tier.T1), // lvl20
-  CharacterName.hansi: Character("Hansi", BaseStats(750, 68, 0, 125, attackCount: 1), Tier.T1), // lvl17
+const Map<CharacterId, Character> characters = {
+  CharacterId.lunaire: LinkingCharacter("Lunaire", BaseStats(885, 89, 89, 100), Tier.T1, lunaireBoost),
+  CharacterId.saras: Character("Saras", BaseStats(885, 148, 41, 100), Tier.T1),
+  CharacterId.lyca: Character("Lyca", BaseStats(826, 118, 177, 125), Tier.T1),
+  CharacterId.hansi: Character("Hansi", BaseStats(750, 68, 0, 125, attackCount: 1), Tier.T1), // lvl17
 };
 
 enum RelicName {

@@ -24,8 +24,8 @@ void main() {
   double t4BuffRatio = 1.2;
 
   test("Raw stat matrix for Lyca and Luna", () {
-    var Lyca = characters[CharacterName.lyca]!;
-    var Lunaire = characters[CharacterName.lunaire] as LinkingCharacter;
+    var Lyca = CharacterId.lyca.get();
+    var Lunaire = CharacterId.lunaire.get() as LinkingCharacter;
     var stats = StatsMatrix(Lyca, Lunaire);
     expect(stats.dimension, 8);
     expect(stats.summary[0][0], null);

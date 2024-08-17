@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var chars = characters.entries.where((elem) => elem.value is! LinkingCharacter).toList();
-    LinkingCharacter supportCharacter = characters[CharacterName.lunaire] as LinkingCharacter;
+    LinkingCharacter supportCharacter = characters[CharacterId.lunaire] as LinkingCharacter;
 
     return MaterialApp(
       title: 'KGC Calculator',

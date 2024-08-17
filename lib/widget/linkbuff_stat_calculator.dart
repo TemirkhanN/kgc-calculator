@@ -13,7 +13,6 @@ class LinkStatBuffCalculator extends StatelessWidget {
   Widget build(BuildContext context) {
     StatsMatrix statsMatrix = StatsMatrix(_main, _support);
 
-
     return Scaffold(
       appBar: AppBar(
         title: const Text("King God Castle Calculator"),
