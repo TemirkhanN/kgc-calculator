@@ -1,5 +1,5 @@
-
-import 'package:god_king_castle_calculator/character.dart';
+import 'package:god_king_castle_calculator/hero.dart';
+import 'package:god_king_castle_calculator/hero/tier.dart';
 
 class StatsSummary {
   final String summary;
@@ -7,26 +7,28 @@ class StatsSummary {
 
   const StatsSummary(this.summary, this.stats);
 
-  StatsSummary.forChar(Character character): this("${character.tier.name} ${character.name}", character.getStats());
+  StatsSummary.forChar(Hero character) : this("${character.tier.name} ${character.name}", character.getStats());
 }
 
 class StatsMatrix {
-  final LinkingCharacter support;
-  final Character main;
+  final LinkingHero support;
+  final Hero main;
   final int dimension = 8;
 
   late final List<List<StatsSummary?>> summary;
 
   StatsMatrix(this.main, this.support) {
-    const allTiers = Tier.values;
+    var allTiers = Tier.values;
 
     summary = List.generate(dimension, (i) => List.filled(dimension, null));
 
     LoopValue column = LoopValue(1, dimension);
     LoopValue row = LoopValue(1, dimension);
     for (Tier tier in allTiers) {
-      summary[0][column.current()] = StatsSummary.forChar(support.ofTier(tier));
-      summary[row.current()][0] = StatsSummary.forChar(main.ofTier(tier));
+      support.ofTier(tier);
+      main.ofTier(tier);
+      summary[0][column.current()] = StatsSummary.forChar(support);
+      summary[row.current()][0] = StatsSummary.forChar(main);
       column.next();
       row.next();
     }
@@ -35,9 +37,10 @@ class StatsMatrix {
     column = LoopValue(1, 7);
     for (Tier tierChar1 in allTiers) {
       for (Tier tierChar2 in allTiers) {
-        var char1 = main.ofTier(tierChar1);
-        var char2 = support.ofTier(tierChar2);
-        var buffedStats = char2.buff(char1);
+        main.ofTier(tierChar1);
+        support.ofTier(tierChar2);
+
+        var buffedStats = support.buff(main);
         summary[row.current()][column.current()] = StatsSummary("", buffedStats);
         column.next();
       }

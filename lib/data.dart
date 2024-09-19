@@ -1,4 +1,6 @@
-import 'package:god_king_castle_calculator/character.dart';
+import 'package:god_king_castle_calculator/hero.dart';
+import 'package:god_king_castle_calculator/hero/skill.dart';
+import 'package:god_king_castle_calculator/hero/tier.dart';
 import 'package:god_king_castle_calculator/relic.dart';
 
 enum CharacterId {
@@ -9,32 +11,30 @@ enum CharacterId {
 }
 
 extension CharacterDiscovery on CharacterId {
-  Character get() {
+  Hero get() {
     return characters[this]!;
   }
 }
 
-const lunaireBoost = [
-  LinkBuff(SkillTier.T1, StatBooster(RatioModifier(0.9), RatioModifier(0.9))),
-  LinkBuff(SkillTier.T2, StatBooster(RatioModifier(1.0), RatioModifier(1.0))),
-  LinkBuff(SkillTier.T3, StatBooster(RatioModifier(1.1), RatioModifier(1.1))),
-  LinkBuff(SkillTier.T4, StatBooster(RatioModifier(1.2), RatioModifier(1.2))),
+var lunaireBoost = [
+  LinkEffect(SkillTier.T1, StatBooster(90, 90)),
+  LinkEffect(SkillTier.T2, StatBooster(100, 100)),
+  LinkEffect(SkillTier.T3, StatBooster(110, 110)),
+  LinkEffect(SkillTier.T4, StatBooster(120, 120)),
 ];
 
 // Considering all chars are lvl20
-const Map<CharacterId, Character> characters = {
-  CharacterId.lunaire: LinkingCharacter("Lunaire", BaseStats(885, 89, 89, 100), Tier.T1, lunaireBoost),
-  CharacterId.saras: Character("Saras", BaseStats(885, 148, 41, 100), Tier.T1),
-  CharacterId.lyca: Character("Lyca", BaseStats(826, 118, 177, 125), Tier.T1),
-  CharacterId.hansi: Character("Hansi", BaseStats(750, 68, 0, 125, attackCount: 1), Tier.T1), // lvl17
+Map<CharacterId, Hero> characters = {
+  CharacterId.lunaire: LinkingHero("Lunaire", BaseStats(885, 89, 89, 100), lunaireBoost),
+  CharacterId.saras: Hero("Saras", BaseStats(885, 148, 41, 100)),
+  CharacterId.lyca: Hero("Lyca", BaseStats(826, 118, 177, 125)),
+  CharacterId.hansi: Hero("Hansi", BaseStats(750, 68, 0, 125, attackCount: 1)), // lvl17
 };
 
-enum RelicName {
-  perpetualVoid
-}
+enum RelicName { perpetualVoid, swordTmp }
 
-const Map<RelicName, Relic> relics = {
-  RelicName.perpetualVoid: Relic.createStacking("Perpetual Void", StatBooster(RatioModifier(0.4), RatioModifier(0.4)), 5),
+Map<RelicName, Relic> relics = {
+  RelicName.perpetualVoid: Relic.createStacking("Perpetual Void", StatBooster(40, 40), 5),
 };
 
 // confirmed S1L1, S1L2, S2L1, S2L2, S3L1, S3L3

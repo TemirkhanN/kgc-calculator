@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:god_king_castle_calculator/character.dart';
+import 'package:god_king_castle_calculator/hero.dart';
 
 class StatsWidget extends StatelessWidget {
   final String summary;
@@ -24,4 +24,3 @@ class StatsWidget extends StatelessWidget {
     );
   }
 }
-

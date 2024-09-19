@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:god_king_castle_calculator/character.dart';
+import 'package:god_king_castle_calculator/hero.dart' as HeroDomain;
 import 'package:god_king_castle_calculator/linked_stats_matrix.dart';
 import 'package:god_king_castle_calculator/widget/character_stats.dart';
 
 class LinkStatBuffCalculator extends StatelessWidget {
-  final Character _main;
-  final LinkingCharacter _support;
+  final HeroDomain.Hero _main;
+  final HeroDomain.LinkingHero _support;
 
   const LinkStatBuffCalculator(this._main, this._support, {super.key});
 
@@ -22,7 +22,7 @@ class LinkStatBuffCalculator extends StatelessWidget {
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: statsMatrix.dimension),
           itemCount: statsMatrix.dimension * statsMatrix.dimension,
           itemBuilder: (BuildContext context, int index) {
-            int row = (index/statsMatrix.dimension).floor();
+            int row = (index / statsMatrix.dimension).floor();
             int col = index % statsMatrix.dimension;
 
             StatsSummary? statSummary = statsMatrix.summary[row][col];

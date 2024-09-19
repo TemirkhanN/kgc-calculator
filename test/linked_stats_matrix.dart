@@ -1,13 +1,18 @@
-import 'package:god_king_castle_calculator/character.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:god_king_castle_calculator/data.dart';
+import 'package:god_king_castle_calculator/hero.dart';
+import 'package:god_king_castle_calculator/hero/tier.dart';
 import 'package:god_king_castle_calculator/linked_stats_matrix.dart';
-import 'package:test/test.dart';
 
 void main() {
   double facilityAttackBonus = 0.4; // 40%
 
   double t1SwordAttackBonus = 0.18; // 18%
-  double t2SwordAttackBonus = 0.27; // 27%
+  var t1SwordStatBoost = StatBooster(17, 0);
+  var t2SwordStatBoost = StatBooster(27, 0);
+  var t3SwordStatBoost = StatBooster(47, 0);
+  var t4SwordStatBoost = StatBooster(81, 0);
+  double t2SwordAttackBonus = 0.28; // 27%
   double t3SwordAttackBonus = 0.47; // 47%
   double t4SwordAttackBonus = 0.81; // 81%
 
@@ -25,7 +30,7 @@ void main() {
 
   test("Raw stat matrix for Lyca and Luna", () {
     var Lyca = CharacterId.lyca.get();
-    var Lunaire = CharacterId.lunaire.get() as LinkingCharacter;
+    var Lunaire = CharacterId.lunaire.get() as LinkingHero;
     var stats = StatsMatrix(Lyca, Lunaire);
     expect(stats.dimension, 8);
     expect(stats.summary[0][0], null);
@@ -55,84 +60,173 @@ void main() {
     expectStats(LycaT7BuffedByLunaT7Stats, 1817, 2726);
   });
 
-  group("Lyca+Lunaire, GSWOTE-T3 relic(10%att Luna, 5%att Lyca)", () {
-    double relicAttackBonusForLuna = 0.1; // 10%
-    double relicAttackBonusForLyca = 0.05; // 5%
+  group("Lyca+Lunaire, relic(10%att Luna, 5%att Lyca), 40% facility", () {
+    var lunaBaseAttack = 1;
+    var relicAttackBonusForLuna = 1;
+    var relicAttackBonusForLyca = 1;
+    var lycaBaseAttack = 1;
 
-    int lunaBaseAttack = 89;
-    int lycaBaseAttack = 118;
+    var facilityBonus = StatBooster(40, 40);
+    var relicBonusForLuna = StatBooster(10, 0);
+    var relicBonusForLyca = StatBooster(5, 0);
 
-    test("Lunaire stats", () {
-      expect(((lunaBaseAttack * t1StatModifier).round() * (1 + relicAttackBonusForLuna + facilityAttackBonus)).round(), 134);
-      expect(((lunaBaseAttack * t1StatModifier).round() * (1 + relicAttackBonusForLuna + facilityAttackBonus + t1SwordAttackBonus)).round(), 150);
-      expect(((lunaBaseAttack * t4StatModifier).round() * (1 + relicAttackBonusForLuna + facilityAttackBonus + t1SwordAttackBonus)).round(), 538);
-      expect(((lunaBaseAttack * t4StatModifier).round() * (1 + relicAttackBonusForLuna + facilityAttackBonus + t2SwordAttackBonus)).round(), 566);
-      expect(((lunaBaseAttack * t5StatModifier).round() * (1 + relicAttackBonusForLuna + facilityAttackBonus + t2SwordAttackBonus)).round(), 756);
-      expect(((lunaBaseAttack * t5StatModifier).round() * (1 + relicAttackBonusForLuna + facilityAttackBonus + t3SwordAttackBonus)).round(), 841);
-      expect(((lunaBaseAttack * t5StatModifier).round() * (1 + relicAttackBonusForLuna + facilityAttackBonus + t4SwordAttackBonus)).round(), 986);
-      expect(((lunaBaseAttack * t6StatModifier).round() * (1 + relicAttackBonusForLuna + facilityAttackBonus + t4SwordAttackBonus)).round(), 1234);
-      expect(((lunaBaseAttack * t7StatModifier).round() * (1 + relicAttackBonusForLuna + facilityAttackBonus + t4SwordAttackBonus)).round(), 1439);
+    var Lyca = CharacterId.lyca.get();
+    Lyca.addBooster(facilityBonus);
+    Lyca.addBooster(relicBonusForLyca);
+    var Lunaire = CharacterId.lunaire.get() as LinkingHero;
+    Lunaire.addBooster(facilityBonus);
+    Lunaire.addBooster(relicBonusForLuna);
+
+    test("T1 Luna", () {
+      expect(Lunaire.ofTier(Tier.T1).getStats().attack, 134);
     });
 
-    test("Lyca stats", () {
-      expect(((lycaBaseAttack * t1StatModifier).round() * (1 + relicAttackBonusForLyca + facilityAttackBonus)).round(), 171);
-      expect(((lycaBaseAttack * t1StatModifier).round() * (1 + relicAttackBonusForLyca + facilityAttackBonus + t1SwordAttackBonus)).round(), 192);
-      expect(((lycaBaseAttack * t2StatModifier).round() * (1 + relicAttackBonusForLuna + facilityAttackBonus + t1SwordAttackBonus)).round(), 318);
-      expect(((lycaBaseAttack * t4StatModifier).round() * (1 + relicAttackBonusForLyca + facilityAttackBonus)).round(), 616);
-      expect(((lycaBaseAttack * t5StatModifier).round() * (1 + relicAttackBonusForLyca + facilityAttackBonus)).round(), 821);
-      expect(((lycaBaseAttack * t6StatModifier).round() * (1 + relicAttackBonusForLyca + facilityAttackBonus)).round(), 1027);
-      expect(((lycaBaseAttack * t6StatModifier).round() * (1 + relicAttackBonusForLyca + facilityAttackBonus + t2SwordAttackBonus)).round(), 1218);
-      expect(((lycaBaseAttack * t7StatModifier).round() * (1 + relicAttackBonusForLyca + facilityAttackBonus + t2SwordAttackBonus)).round(), 1421);
+    test("T1 Luna T1 Sword", () {
+      var luna = Lunaire.ofTier(Tier.T1);
+      luna.addBooster(t1SwordStatBoost);
+      expect(luna.getStats().attack, 150);
+    });
+
+    test("T4 Luna T1 Sword", () {
+      var luna = Lunaire.ofTier(Tier.T4);
+      luna.addBooster(t1SwordStatBoost);
+      expect(luna.getStats().attack, 538);
+    });
+
+    test("T4 Luna T2 Sword", () {
+      var luna = Lunaire.ofTier(Tier.T4);
+      luna.addBooster(t2SwordStatBoost);
+      expect(luna.getStats().attack, 566);
+    });
+
+    test("T5 Luna T2 Sword", () {
+      var luna = Lunaire.ofTier(Tier.T5);
+      luna.addBooster(t2SwordStatBoost);
+      expect(luna.getStats().attack, 756);
+    });
+
+    test("T5 Luna T3 Sword", () {
+      var luna = Lunaire.ofTier(Tier.T5);
+      luna.addBooster(t3SwordStatBoost);
+      expect(luna.getStats().attack, 841);
+    });
+
+    test("T5 Luna T4 Sword", () {
+      var luna = Lunaire.ofTier(Tier.T5);
+      luna.addBooster(t4SwordStatBoost);
+      expect(luna.getStats().attack, 986);
+    });
+
+    test("T6 Luna T4 Sword", () {
+      var luna = Lunaire.ofTier(Tier.T6);
+      luna.addBooster(t4SwordStatBoost);
+      expect(luna.getStats().attack, 1234);
+    });
+
+    test("T7 Luna T4 Sword", () {
+      var luna = Lunaire.ofTier(Tier.T7);
+      luna.addBooster(t4SwordStatBoost);
+      expect(luna.getStats().attack, 1439);
+    });
+
+    test("T1 Lyca", () {
+      expect(Lyca.ofTier(Tier.T1).getStats().attack, 171);
+    });
+
+    test("T1 Lyca T1 Sword", () {
+      var lyca = Lyca.ofTier(Tier.T1);
+      lyca.addBooster(t1SwordStatBoost);
+      expect(lyca.getStats().attack, 192);
+    });
+
+    test("T2 Lyca T1 Sword", () {
+      var lyca = Lyca.ofTier(Tier.T2);
+      lyca.addBooster(t1SwordStatBoost);
+      expect(lyca.getStats().attack, 318);
+    });
+
+    test("T4 Lyca", () {
+      expect(Lyca.ofTier(Tier.T4).getStats().attack, 616);
+    });
+
+    test("T5 Lyca", () {
+      expect(Lyca.ofTier(Tier.T5).getStats().attack, 821);
+    });
+
+    test("T6 Lyca", () {
+      expect(Lyca.ofTier(Tier.T6).getStats().attack, 1027);
+    });
+
+    test("T6 Lyca T2 Sword", () {
+      var lyca = Lyca.ofTier(Tier.T6);
+      lyca.addBooster(t2SwordStatBoost);
+      expect(lyca.getStats().attack, 1218);
+    });
+
+    test("T7 Lyca T2 Sword", () {
+      var lyca = Lyca.ofTier(Tier.T7);
+      lyca.addBooster(t2SwordStatBoost);
+      expect(lyca.getStats().attack, 1421);
+    });
+
+    test("T6 Luna buffed T7 Lyca + T2 Sword", () {
+      var lyca = Lyca.ofTier(Tier.T7);
+      lyca.addBooster(t2SwordStatBoost);
+
+      var luna = Lunaire.ofTier(Tier.T6) as LinkingHero;
+      var finalStats = luna.buff(lyca);
+
+      expect(finalStats.attack, 2596);
     });
 
     test("Lyca+Luna, GSWOTE-T3 relic(10%att Luna, 5%att Lyca)", () {
       expect(
           ((lycaBaseAttack * t7StatModifier).round() * (1 + relicAttackBonusForLyca + facilityAttackBonus + t2SwordAttackBonus)).round() +
               (((lycaBaseAttack * t6StatModifier).round() * (1 + relicAttackBonusForLuna + facilityAttackBonus)).round() * t3BuffRatio).round(),
-          2596// fails because result is 2589 (7)
-      );
+          2596 // fails because result is 2589 (7)
+          );
 
       expect(
           ((lycaBaseAttack * t6StatModifier).round() * (1 + relicAttackBonusForLyca + facilityAttackBonus + t2SwordAttackBonus)).round() +
               (((lycaBaseAttack * t7StatModifier).round() * (1 + relicAttackBonusForLuna + facilityAttackBonus + t4SwordAttackBonus)).round() * t4BuffRatio).round(),
-          3520// fails because result is 3508 (12)
-      );
+          3520 // fails because result is 3508 (12)
+          );
 
       expect(
           ((lycaBaseAttack * t6StatModifier).round() * (1 + relicAttackBonusForLyca + facilityAttackBonus)).round() +
               (((lycaBaseAttack * t7StatModifier).round() * (1 + relicAttackBonusForLuna + facilityAttackBonus + t4SwordAttackBonus)).round() * t4BuffRatio).round(),
-          3329// fails because result is 3317 (12)
-      );
+          3329 // fails because result is 3317 (12)
+          );
 
       expect(
           ((lycaBaseAttack * t5StatModifier).round() * (1 + relicAttackBonusForLyca + facilityAttackBonus)).round() +
               (((lycaBaseAttack * t6StatModifier).round() * (1 + relicAttackBonusForLuna + facilityAttackBonus + t4SwordAttackBonus)).round() * t3BuffRatio).round(),
-          2631// fails because result is 2620 (11)
-      );
+          2631 // fails because result is 2620 (11)
+          );
 
       expect(
           ((lycaBaseAttack * t4StatModifier).round() * (1 + relicAttackBonusForLyca + facilityAttackBonus)).round() +
               (((lycaBaseAttack * t5StatModifier).round() * (1 + relicAttackBonusForLuna + facilityAttackBonus + t4SwordAttackBonus)).round() * t3BuffRatio).round(),
-          2062// fails because result is 2054 (8)
-      );
+          2062 // fails because result is 2054 (8)
+          );
 
       expect(
           ((lycaBaseAttack * t4StatModifier).round() * (1 + relicAttackBonusForLyca + facilityAttackBonus)).round() +
               (((lycaBaseAttack * t5StatModifier).round() * (1 + relicAttackBonusForLuna + facilityAttackBonus + t3SwordAttackBonus)).round() * t3BuffRatio).round(),
-          1850// fails because result is 1843 (7)
-      );
+          1850 // fails because result is 1843 (7)
+          );
 
       expect(
           ((lycaBaseAttack * t4StatModifier).round() * (1 + relicAttackBonusForLyca + facilityAttackBonus)).round() +
               (((lycaBaseAttack * t2StatModifier).round() * (1 + relicAttackBonusForLuna + facilityAttackBonus + t1SwordAttackBonus)).round() * t1BuffRatio).round(),
-          903// fails because result is 902 (1)
-      );
+          903 // fails because result is 902 (1)
+          );
 
       expect(
           ((lycaBaseAttack * t4StatModifier).round() * (1 + relicAttackBonusForLyca + facilityAttackBonus)).round() +
               (((lycaBaseAttack * t5StatModifier).round() * (1 + relicAttackBonusForLuna + facilityAttackBonus + t2SwordAttackBonus)).round() * t3BuffRatio).round(),
-          1725// fails because result is 1718
-      );
+          1725 // fails because result is 1718
+          );
     });
   });
 
@@ -155,16 +249,12 @@ void main() {
     expect(((lycaBaseAttack * t7StatModifier * (1 + (4 * perpetualVoidBuff))).round() * (1 + relicAttackBonusForLyca + facilityAttackBonus)).round(), 1769);
 
     expect(
-        (lycaBaseAttack * (1 + relicAttackBonusForLyca + facilityAttackBonus)).round() +
-            ((lycaBaseAttack * (1 + relicAttackBonusForLuna + facilityAttackBonus)).round() * t1BuffRatio).round(),
-        335
-    );
+        (lycaBaseAttack * (1 + relicAttackBonusForLyca + facilityAttackBonus)).round() + ((lycaBaseAttack * (1 + relicAttackBonusForLuna + facilityAttackBonus)).round() * t1BuffRatio).round(), 335);
 
     expect(
         ((lycaBaseAttack * t1StatModifier * (1 + perpetualVoidBuff)).round() * (1 + relicAttackBonusForLyca + facilityAttackBonus)).round() +
             (((lycaBaseAttack * t1StatModifier).round() * (1 + relicAttackBonusForLuna + facilityAttackBonus)).round() * t1BuffRatio).round(),
-        353
-    );
+        353);
   });
 }
 

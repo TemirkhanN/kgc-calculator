@@ -1,4 +1,4 @@
-import 'package:god_king_castle_calculator/character.dart';
+import 'package:god_king_castle_calculator/hero.dart';
 
 class Relic {
   final String name;
@@ -13,8 +13,8 @@ class Relic {
     }
 
     var result = stats;
-    for (int i=0; i<stacks; i++) {
-      result = _booster.boost(result);
+    for (int i = 0; i < stacks; i++) {
+      result = _booster.applyTo(result);
     }
 
     return result;
