@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:god_king_castle_calculator/hero.dart' as HeroDomain;
-import 'package:god_king_castle_calculator/linked_stats_matrix.dart';
 import 'package:god_king_castle_calculator/widget/character_stats.dart';
+import 'package:god_king_castle_calculator/widget/linked_stats_matrix.dart';
 
 class LinkStatBuffCalculator extends StatelessWidget {
   final HeroDomain.Hero _main;

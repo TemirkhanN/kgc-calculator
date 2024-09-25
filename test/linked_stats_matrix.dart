@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:god_king_castle_calculator/data.dart';
 import 'package:god_king_castle_calculator/hero.dart';
 import 'package:god_king_castle_calculator/hero/tier.dart';
-import 'package:god_king_castle_calculator/linked_stats_matrix.dart';
+import 'package:god_king_castle_calculator/widget/linked_stats_matrix.dart';
 
 void main() {
   double facilityAttackBonus = 0.4; // 40%
