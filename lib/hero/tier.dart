@@ -15,7 +15,7 @@ enum Tier {
 extension TierExtension on Tier {
   Stats applyToStats(BaseStats baseStats) {
     var statModifier = _getStatModifier();
-    var attackSpeedModifier = _getAttackSpeedModifier();
+    var attackSpeedModifier = getAttackSpeedModifier();
 
     return Stats(statModifier.apply(baseStats.hp), statModifier.apply(baseStats.attack), statModifier.apply(baseStats.spellPower), attackSpeedModifier.apply(baseStats.attackSpeed),
         attackCount: baseStats.attackCount);
@@ -37,7 +37,7 @@ extension TierExtension on Tier {
     }
   }
 
-  Modifier _getStatModifier() {
+  RatioModifier _getStatModifier() {
     switch (this) {
       case Tier.T1:
         return const RatioModifier(1.0);
@@ -56,33 +56,27 @@ extension TierExtension on Tier {
     }
   }
 
-  Modifier _getAttackSpeedModifier() {
+  RatioModifier getAttackSpeedModifier() {
     switch (this) {
       case Tier.T1:
-        return const ConstantModifier(0);
+        return const RatioModifier(1.0);
       case Tier.T2:
-        return const ConstantModifier(10);
+        return const RatioModifier(1.1);
       case Tier.T3:
-        return const ConstantModifier(20);
+        return const RatioModifier(1.2);
       case Tier.T4:
-        return const ConstantModifier(30);
+        return const RatioModifier(1.3);
       case Tier.T5:
-        return const ConstantModifier(40);
+        return const RatioModifier(1.4);
       case Tier.T6:
-        return const ConstantModifier(50);
+        return const RatioModifier(1.5);
       case Tier.T7:
-        return const ConstantModifier(60);
+        return const RatioModifier(1.6);
     }
   }
 }
 
-interface class Modifier {
-  int apply(int to) {
-    throw UnimplementedError("Not implemented");
-  }
-}
-
-class RatioModifier implements Modifier {
+class RatioModifier {
   final double ratio;
 
   const RatioModifier(this.ratio);
@@ -91,24 +85,11 @@ class RatioModifier implements Modifier {
     return RatioModifier(value / 100);
   }
 
-  @override
   int apply(int to) {
     return (ratio * to).round();
   }
 
   int asPercentage() {
     return (ratio * 100).toInt();
-  }
-}
-
-// TODO rethink
-class ConstantModifier implements Modifier {
-  final int _value;
-
-  const ConstantModifier(this._value);
-
-  @override
-  int apply(int to) {
-    return _value + to;
   }
 }

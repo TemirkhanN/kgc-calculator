@@ -11,7 +11,7 @@ class LinkedStatsMatrix extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var chars = characters.entries.where((elem) => elem.value is! hero_domain.LinkingHero).toList();
-    hero_domain.LinkingHero supportCharacter = characters[CharacterId.lunaire] as hero_domain.LinkingHero;
+    hero_domain.LinkingHero supportCharacter = characters[CharacterName.lunaire] as hero_domain.LinkingHero;
 
     return MaterialApp(
       title: 'KGC Calculator',

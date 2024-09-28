@@ -12,40 +12,45 @@ class BaseStats {
 }
 
 class Stats extends BaseStats {
-  Stats(super.hp, super.attack, super.spellPower, super.attackSpeed, {super.attackCount});
+  const Stats(super.hp, super.attack, super.spellPower, super.attackSpeed, {super.attackCount});
 }
 
 class StatBooster {
   final RatioModifier attackBoost;
   final RatioModifier spellBoost;
+  final RatioModifier attackSpeedModifier;
 
-  const StatBooster._(this.attackBoost, this.spellBoost);
+  const StatBooster._(this.attackBoost, this.spellBoost, {this.attackSpeedModifier = const RatioModifier(0)});
 
-  factory StatBooster(int attackBonus, int spellBonus) {
+  factory StatBooster(int attackBonus, int spellBonus, {int attackSpeedModifier = 0}) {
     return StatBooster._(
       RatioModifier.percentage(attackBonus),
       RatioModifier.percentage(spellBonus),
+      attackSpeedModifier: RatioModifier.percentage(attackSpeedModifier),
     );
   }
 
   factory StatBooster.combine(List<StatBooster> boosters) {
     int attackBoost = 0;
     int spellBoost = 0;
+    int attackSpeedBoost = 0;
     for (var booster in boosters) {
       attackBoost += booster.attackBoost.asPercentage();
       spellBoost += booster.spellBoost.asPercentage();
+      attackSpeedBoost += booster.attackSpeedModifier.asPercentage();
     }
 
-    return StatBooster(attackBoost, spellBoost);
+    return StatBooster(attackBoost, spellBoost, attackSpeedModifier: attackSpeedBoost);
   }
 
   Stats applyTo(Stats stats) {
-    return Stats(
-      stats.hp,
-      stats.attack + (stats.attack * attackBoost.ratio).round(),
-      stats.spellPower + (stats.spellPower * spellBoost.ratio).round(),
-      stats.attackSpeed,
-    );
+    var bonusStats = calculateBonus(stats);
+
+    return Stats(stats.hp + bonusStats.hp, stats.attack + bonusStats.attack, stats.spellPower + bonusStats.spellPower, stats.attackSpeed + bonusStats.attackSpeed, attackCount: stats.attackCount);
+  }
+
+  Stats calculateBonus(Stats stats) {
+    return Stats(0, (stats.attack * attackBoost.ratio).round(), (stats.spellPower * spellBoost.ratio).round(), (stats.attackSpeed * attackSpeedModifier.ratio).ceil(), attackCount: 0);
   }
 }
 
@@ -70,9 +75,15 @@ class Hero {
   }
 
   Stats getStats() {
-    Stats unmodifiedStats = tier.applyToStats(baseStats);
+    Stats tieredStats = tier.applyToStats(baseStats);
+    // Because attack speed bonuses are applied over base(T1) stat!!!! >:(
+    var tieredStatsExceptAttackSpeed = Stats(tieredStats.hp, tieredStats.attack, tieredStats.spellPower, baseStats.attackSpeed, attackCount: tieredStats.attackCount);
+    int tierAttackSpeedBonus = tier.getAttackSpeedModifier().asPercentage() - 100;
+    var bonusStats = StatBooster.combine([...statsBoosters, StatBooster(0, 0, attackSpeedModifier: tierAttackSpeedBonus)]).calculateBonus(tieredStatsExceptAttackSpeed);
 
-    return StatBooster.combine(statsBoosters).applyTo(unmodifiedStats);
+    return Stats(tieredStatsExceptAttackSpeed.hp + bonusStats.hp, tieredStatsExceptAttackSpeed.attack + bonusStats.attack, tieredStatsExceptAttackSpeed.spellPower + bonusStats.spellPower,
+        tieredStatsExceptAttackSpeed.attackSpeed + bonusStats.attackSpeed,
+        attackCount: tieredStatsExceptAttackSpeed.attackCount);
   }
 }
 
@@ -92,8 +103,9 @@ class LinkingHero extends Hero {
     var targetStats = target.getStats();
 
     var myRawStats = tier.applyToStats(target.baseStats);
+    // Beware, if at some point some hero starts buffing attack speed, this needs to be adjusted
     var myBoostedStats = StatBooster.combine(statsBoosters).applyTo(myRawStats);
-    var bonusStats = StatBooster.combine([buff.statsBonus, StatBooster(-100, -100)]).applyTo(myBoostedStats);
+    var bonusStats = StatBooster.combine([buff.statsBonus]).calculateBonus(myBoostedStats);
 
     return Stats(targetStats.hp, (bonusStats.attack / targetStats.attackCount).round() + targetStats.attack, bonusStats.spellPower + targetStats.spellPower, targetStats.attackSpeed,
         attackCount: targetStats.attackCount);

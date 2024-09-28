@@ -29,8 +29,8 @@ void main() {
   double t4BuffRatio = 1.2;
 
   test("Raw stat matrix for Lyca and Luna", () {
-    var Lyca = CharacterId.lyca.get();
-    var Lunaire = CharacterId.lunaire.get() as LinkingHero;
+    var Lyca = CharacterName.lyca.get();
+    var Lunaire = CharacterName.lunaire.get() as LinkingHero;
     var stats = StatsMatrix(Lyca, Lunaire);
     expect(stats.dimension, 8);
     expect(stats.summary[0][0], null);
@@ -70,10 +70,10 @@ void main() {
     var relicBonusForLuna = StatBooster(10, 0);
     var relicBonusForLyca = StatBooster(5, 0);
 
-    var Lyca = CharacterId.lyca.get();
+    var Lyca = CharacterName.lyca.get();
     Lyca.addBooster(facilityBonus);
     Lyca.addBooster(relicBonusForLyca);
-    var Lunaire = CharacterId.lunaire.get() as LinkingHero;
+    var Lunaire = CharacterName.lunaire.get() as LinkingHero;
     Lunaire.addBooster(facilityBonus);
     Lunaire.addBooster(relicBonusForLuna);
 
