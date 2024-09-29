@@ -107,7 +107,7 @@ class LinkingHero extends Hero {
     var myBoostedStats = StatBooster.combine(statsBoosters).applyTo(myRawStats);
     var bonusStats = StatBooster.combine([buff.statsBonus]).calculateBonus(myBoostedStats);
 
-    return Stats(targetStats.hp, (bonusStats.attack / targetStats.attackCount).round() + targetStats.attack, bonusStats.spellPower + targetStats.spellPower, targetStats.attackSpeed,
+    return Stats(targetStats.hp, (bonusStats.attack / target.baseStats.attackCount).round() + targetStats.attack, bonusStats.spellPower + targetStats.spellPower, targetStats.attackSpeed,
         attackCount: targetStats.attackCount);
   }
 }
