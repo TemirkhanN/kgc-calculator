@@ -1,8 +1,7 @@
-import 'package:god_king_castle_calculator/hero.dart';
 import 'package:god_king_castle_calculator/hero/equipment.dart';
+import 'package:god_king_castle_calculator/hero/hero.dart';
 import 'package:god_king_castle_calculator/hero/skill.dart';
 import 'package:god_king_castle_calculator/hero/tier.dart';
-import 'package:god_king_castle_calculator/relic.dart';
 
 enum CharacterName {
   lunaire,
@@ -36,12 +35,6 @@ Map<CharacterName, Hero> characters = {
   CharacterName.sargula: Hero("Sargula", BaseStats(1593, 207, 118, 100)),
   CharacterName.zuoYun: Hero("Zuo Yun", BaseStats(1062, 118, 59, 125)),
   CharacterName.mel: Hero("Mel", BaseStats(1298, 177, 295, 83)),
-};
-
-enum RelicName { perpetualVoid, swordTmp }
-
-Map<RelicName, Relic> relics = {
-  RelicName.perpetualVoid: Relic.createStacking("Perpetual Void", StatBooster(40, 40), 5),
 };
 
 enum EquipmentId {

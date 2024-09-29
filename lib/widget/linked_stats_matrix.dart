@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:god_king_castle_calculator/data.dart';
-import 'package:god_king_castle_calculator/hero.dart' as hero_domain;
+import 'package:god_king_castle_calculator/hero/hero.dart' as hero_domain;
 import 'package:god_king_castle_calculator/hero/tier.dart';
 import 'package:god_king_castle_calculator/main.dart';
 import 'package:god_king_castle_calculator/widget/linkbuff_stat_calculator.dart';

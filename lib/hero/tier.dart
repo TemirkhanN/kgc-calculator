@@ -1,4 +1,4 @@
-import 'package:god_king_castle_calculator/hero.dart';
+import 'package:god_king_castle_calculator/hero/hero.dart';
 
 enum SkillTier { T1, T2, T3, T4 }
 
