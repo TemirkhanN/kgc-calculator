@@ -16,18 +16,22 @@ class Stats extends BaseStats {
 }
 
 class StatBooster {
-  final RatioModifier attackBoost;
-  final RatioModifier spellBoost;
-  final RatioModifier attackSpeedModifier;
+  final int attack;
+  final int spell;
+  final int aSpeed;
 
-  const StatBooster._(this.attackBoost, this.spellBoost, {this.attackSpeedModifier = const RatioModifier(0)});
+  const StatBooster({this.attack = 0, this.spell = 0, this.aSpeed = 0});
 
-  factory StatBooster(int attackBonus, int spellBonus, {int attackSpeedModifier = 0}) {
-    return StatBooster._(
-      RatioModifier.percentage(attackBonus),
-      RatioModifier.percentage(spellBonus),
-      attackSpeedModifier: RatioModifier.percentage(attackSpeedModifier),
-    );
+  factory StatBooster.attackSpeed(int attackSpeedBonus) {
+    return StatBooster(aSpeed: attackSpeedBonus);
+  }
+
+  factory StatBooster.attack(int attackBonus) {
+    return StatBooster(attack: attackBonus);
+  }
+
+  factory StatBooster.spell(int spellBonus) {
+    return StatBooster(spell: spellBonus);
   }
 
   factory StatBooster.combine(List<StatBooster> boosters) {
@@ -35,12 +39,12 @@ class StatBooster {
     int spellBoost = 0;
     int attackSpeedBoost = 0;
     for (var booster in boosters) {
-      attackBoost += booster.attackBoost.asPercentage();
-      spellBoost += booster.spellBoost.asPercentage();
-      attackSpeedBoost += booster.attackSpeedModifier.asPercentage();
+      attackBoost += booster.attack;
+      spellBoost += booster.spell;
+      attackSpeedBoost += booster.aSpeed;
     }
 
-    return StatBooster(attackBoost, spellBoost, attackSpeedModifier: attackSpeedBoost);
+    return StatBooster(attack: attackBoost, spell: spellBoost, aSpeed: attackSpeedBoost);
   }
 
   Stats applyTo(Stats stats) {
@@ -50,7 +54,19 @@ class StatBooster {
   }
 
   Stats calculateBonus(Stats stats) {
-    return Stats(0, (stats.attack * attackBoost.ratio).round(), (stats.spellPower * spellBoost.ratio).round(), (stats.attackSpeed * attackSpeedModifier.ratio).ceil(), attackCount: 0);
+    return Stats(0, (stats.attack * _attackRatio()).round(), (stats.spellPower * _spellRatio()).round(), (stats.attackSpeed * _aSpeedRatio()).ceil(), attackCount: 0);
+  }
+
+  double _attackRatio() {
+    return attack / 100;
+  }
+
+  double _spellRatio() {
+    return spell / 100;
+  }
+
+  double _aSpeedRatio() {
+    return aSpeed / 100;
   }
 }
 
@@ -79,7 +95,7 @@ class Hero {
     // Because attack speed bonuses are applied over base(T1) stat!!!! >:(
     var tieredStatsExceptAttackSpeed = Stats(tieredStats.hp, tieredStats.attack, tieredStats.spellPower, baseStats.attackSpeed, attackCount: tieredStats.attackCount);
     int tierAttackSpeedBonus = tier.getAttackSpeedModifier().asPercentage() - 100;
-    var bonusStats = StatBooster.combine([...statsBoosters, StatBooster(0, 0, attackSpeedModifier: tierAttackSpeedBonus)]).calculateBonus(tieredStatsExceptAttackSpeed);
+    var bonusStats = StatBooster.combine([...statsBoosters, StatBooster(aSpeed: tierAttackSpeedBonus)]).calculateBonus(tieredStatsExceptAttackSpeed);
 
     return Stats(tieredStatsExceptAttackSpeed.hp + bonusStats.hp, tieredStatsExceptAttackSpeed.attack + bonusStats.attack, tieredStatsExceptAttackSpeed.spellPower + bonusStats.spellPower,
         tieredStatsExceptAttackSpeed.attackSpeed + bonusStats.attackSpeed,

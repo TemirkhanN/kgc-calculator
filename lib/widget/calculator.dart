@@ -59,18 +59,13 @@ class _CalculatorState extends State<Calculator> {
     }
 
     // It's maximum level of boost. Don't really see reason to play around with these
-    var facilityBooster = hero_domain.StatBooster(40, 40, attackSpeedModifier: 40);
+    var facilityBooster = const hero_domain.StatBooster(attack: 0, spell: 0, aSpeed: 0);
     adjustedHero.addBooster(facilityBooster);
 
-    var relicBoosters = [
-      hero_domain.StatBooster(int.tryParse(_relicAttackBonusController.text) ?? 0, 0),
-      hero_domain.StatBooster(0, int.tryParse(_relicSpellPowerController.text) ?? 0),
-      hero_domain.StatBooster(0, 0, attackSpeedModifier: int.tryParse(_relicASpeedController.text) ?? 0),
-    ];
+    var relicBooster = hero_domain.StatBooster(
+        attack: int.tryParse(_relicAttackBonusController.text) ?? 0, spell: int.tryParse(_relicSpellPowerController.text) ?? 0, aSpeed: int.tryParse(_relicASpeedController.text) ?? 0);
 
-    for (var relicBooster in relicBoosters) {
-      adjustedHero.addBooster(relicBooster);
-    }
+    adjustedHero.addBooster(relicBooster);
 
     for (var equipment in equipmentSlots.values) {
       if (equipment == null) {
@@ -83,14 +78,17 @@ class _CalculatorState extends State<Calculator> {
   }
 
   Widget _equipmentSlots() {
-    var equipmentOptions = _equipmentRepository.findAll();
+    // TODO due to back and forth navigation, widget isn't rendered after returning from equipment creator. Thus, new options don't appear until reloading page...
+    var equipmentOptions = _equipmentRepository.findAll().map((item) => DropdownMenuItem(value: item.id, child: Text("${item.tier().name} ${item.name()}"))).toList();
+
+    equipmentOptions.add(const DropdownMenuItem(child: Text("none")));
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: equipmentSlots.entries.map((slot) {
         return Column(children: [
           DropdownButton(
-            items: equipmentOptions.map((item) => DropdownMenuItem(value: item.id, child: Text(item.name()))).toList()..add(const DropdownMenuItem(child: Text("empty"))),
+            items: equipmentOptions,
             value: slot.value?.id,
             onChanged: (equipmentId) {
               setState(() {

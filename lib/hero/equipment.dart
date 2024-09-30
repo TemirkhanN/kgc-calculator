@@ -6,39 +6,39 @@ extension EquipmentBoostExtension on Tier {
   StatBooster getBowBonus() {
     switch (this) {
       case Tier.T1:
-        return StatBooster(0, 0, attackSpeedModifier: 25);
+        return StatBooster.attackSpeed(25);
       case Tier.T2:
-        return StatBooster(0, 0, attackSpeedModifier: 40);
+        return StatBooster.attackSpeed(40);
       case Tier.T3:
-        return StatBooster(0, 0, attackSpeedModifier: 70);
+        return StatBooster.attackSpeed(70);
       case Tier.T4:
-        return StatBooster(0, 0, attackSpeedModifier: 120);
+        return StatBooster.attackSpeed(120);
     }
   }
 
   StatBooster getSwordBonus() {
     switch (this) {
       case Tier.T1:
-        return StatBooster(13, 0);
+        return StatBooster.attack(13);
       case Tier.T2:
-        return StatBooster(20, 0);
+        return StatBooster.attack(20);
       case Tier.T3:
-        return StatBooster(35, 0);
+        return StatBooster.attack(35);
       case Tier.T4:
-        return StatBooster(60, 0);
+        return StatBooster.attack(60);
     }
   }
 
   StatBooster getStaffBonus() {
     switch (this) {
       case Tier.T1:
-        return StatBooster(0, 40);
+        return StatBooster.spell(40);
       case Tier.T2:
-        return StatBooster(0, 70);
+        return StatBooster.spell(70);
       case Tier.T3:
-        return StatBooster(0, 120);
+        return StatBooster.spell(120);
       case Tier.T4:
-        return StatBooster(0, 200);
+        return StatBooster.spell(200);
     }
   }
 }
@@ -49,6 +49,7 @@ enum EquipmentType {
   sword,
 }
 
+// TODO make it internal
 class EquipmentPrototype {
   final EquipmentType type;
   final Tier tier;

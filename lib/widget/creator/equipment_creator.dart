@@ -27,7 +27,7 @@ class _EquipmentCreatorState extends State<EquipmentCreator> {
             child: Column(children: [
           const Text("Here you can create equipment presets for further usage in calculator"),
           DropdownButton(
-            items: _repository.findAll().map((item) => DropdownMenuItem(value: item.id, child: Text(item.name()))).toList(growable: false),
+            items: _repository.findAll().map((item) => DropdownMenuItem(value: item.id, child: Text("${item.tier().name} ${item.name()}"))).toList(growable: false),
             onChanged: (id) => {
               setState(() {
                 _equipmentId = id;
@@ -59,6 +59,12 @@ class _EquipmentCreatorState extends State<EquipmentCreator> {
           ElevatedButton(
               onPressed: () {
                 if (_type == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text(
+                    "Item type is necessary",
+                    style: TextStyle(color: Color.fromRGBO(150, 0, 0, 1)),
+                  )));
+
                   return;
                 }
 
@@ -71,16 +77,8 @@ class _EquipmentCreatorState extends State<EquipmentCreator> {
 
                 _repository.save(savingEquipment);
                 _equipmentId = savingEquipment.id;
-                showDialog(
-                    context: context,
-                    builder: (context) {
-                      return const Dialog(
-                        child: Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Text("Saved to storage."
-                                "You can use it in calculator now.")),
-                      );
-                    });
+                // TODO this is odd. Add lacks theme configuration since snackbar is white
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Saved to storage. You can now use it in calculator.")));
               },
               child: const Text("Save"))
         ])));

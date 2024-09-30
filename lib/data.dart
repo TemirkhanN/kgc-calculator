@@ -18,11 +18,11 @@ extension CharacterDiscovery on CharacterName {
   }
 }
 
-var lunaireBoost = [
-  LinkEffect(Tier.T1, StatBooster(90, 90)),
-  LinkEffect(Tier.T2, StatBooster(100, 100)),
-  LinkEffect(Tier.T3, StatBooster(110, 110)),
-  LinkEffect(Tier.T4, StatBooster(120, 120)),
+const lunaireBoost = [
+  LinkEffect(Tier.T1, StatBooster(attack: 90, spell: 90)),
+  LinkEffect(Tier.T2, StatBooster(attack: 100, spell: 100)),
+  LinkEffect(Tier.T3, StatBooster(attack: 110, spell: 110)),
+  LinkEffect(Tier.T4, StatBooster(attack: 120, spell: 120)),
 ];
 
 // Considering all chars are lvl20
