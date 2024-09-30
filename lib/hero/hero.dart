@@ -58,9 +58,9 @@ class Hero {
   final String name;
   final BaseStats baseStats;
   List<StatBooster> statsBoosters;
-  final Tier tier;
+  final HeroTier tier;
 
-  Hero(this.name, this.baseStats, {List<StatBooster>? statsBoosters, this.tier = Tier.T1}) : statsBoosters = statsBoosters ?? [];
+  Hero(this.name, this.baseStats, {List<StatBooster>? statsBoosters, this.tier = HeroTier.T1}) : statsBoosters = statsBoosters ?? [];
 
   BaseStats getBaseStats() {
     return baseStats;
@@ -70,7 +70,7 @@ class Hero {
     statsBoosters.add(booster);
   }
 
-  Hero ofTier(Tier tier) {
+  Hero ofTier(HeroTier tier) {
     return Hero(name, baseStats, statsBoosters: List.from(statsBoosters), tier: tier);
   }
 
@@ -93,7 +93,7 @@ class LinkingHero extends Hero {
   LinkingHero(super.name, super.baseStats, this._linkBuff, {super.statsBoosters, super.tier});
 
   @override
-  Hero ofTier(Tier tier) {
+  Hero ofTier(HeroTier tier) {
     return LinkingHero(name, baseStats, _linkBuff, statsBoosters: List.from(statsBoosters), tier: tier);
   }
 

@@ -48,13 +48,13 @@ class StatsMatrix {
   late final List<List<StatsSummary?>> summary;
 
   StatsMatrix(this.main, this.support) {
-    var allTiers = Tier.values;
+    var allTiers = HeroTier.values;
 
     summary = List.generate(dimension, (i) => List.filled(dimension, null));
 
     LoopValue column = LoopValue(1, dimension);
     LoopValue row = LoopValue(1, dimension);
-    for (Tier tier in allTiers) {
+    for (HeroTier tier in allTiers) {
       support.ofTier(tier);
       main.ofTier(tier);
       summary[0][column.current()] = StatsSummary.forChar(support);
@@ -65,8 +65,8 @@ class StatsMatrix {
 
     row = LoopValue(1, 7);
     column = LoopValue(1, 7);
-    for (Tier tierChar1 in allTiers) {
-      for (Tier tierChar2 in allTiers) {
+    for (HeroTier tierChar1 in allTiers) {
+      for (HeroTier tierChar2 in allTiers) {
         main.ofTier(tierChar1);
         support.ofTier(tierChar2);
 

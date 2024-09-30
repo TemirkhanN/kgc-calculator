@@ -78,102 +78,102 @@ void main() {
     Lunaire.addBooster(relicBonusForLuna);
 
     test("T1 Luna", () {
-      expect(Lunaire.ofTier(Tier.T1).getStats().attack, 134);
+      expect(Lunaire.ofTier(HeroTier.T1).getStats().attack, 134);
     });
 
     test("T1 Luna T1 Sword", () {
-      var luna = Lunaire.ofTier(Tier.T1);
+      var luna = Lunaire.ofTier(HeroTier.T1);
       luna.addBooster(t1SwordStatBoost);
       expect(luna.getStats().attack, 150);
     });
 
     test("T4 Luna T1 Sword", () {
-      var luna = Lunaire.ofTier(Tier.T4);
+      var luna = Lunaire.ofTier(HeroTier.T4);
       luna.addBooster(t1SwordStatBoost);
       expect(luna.getStats().attack, 538);
     });
 
     test("T4 Luna T2 Sword", () {
-      var luna = Lunaire.ofTier(Tier.T4);
+      var luna = Lunaire.ofTier(HeroTier.T4);
       luna.addBooster(t2SwordStatBoost);
       expect(luna.getStats().attack, 566);
     });
 
     test("T5 Luna T2 Sword", () {
-      var luna = Lunaire.ofTier(Tier.T5);
+      var luna = Lunaire.ofTier(HeroTier.T5);
       luna.addBooster(t2SwordStatBoost);
       expect(luna.getStats().attack, 756);
     });
 
     test("T5 Luna T3 Sword", () {
-      var luna = Lunaire.ofTier(Tier.T5);
+      var luna = Lunaire.ofTier(HeroTier.T5);
       luna.addBooster(t3SwordStatBoost);
       expect(luna.getStats().attack, 841);
     });
 
     test("T5 Luna T4 Sword", () {
-      var luna = Lunaire.ofTier(Tier.T5);
+      var luna = Lunaire.ofTier(HeroTier.T5);
       luna.addBooster(t4SwordStatBoost);
       expect(luna.getStats().attack, 986);
     });
 
     test("T6 Luna T4 Sword", () {
-      var luna = Lunaire.ofTier(Tier.T6);
+      var luna = Lunaire.ofTier(HeroTier.T6);
       luna.addBooster(t4SwordStatBoost);
       expect(luna.getStats().attack, 1234);
     });
 
     test("T7 Luna T4 Sword", () {
-      var luna = Lunaire.ofTier(Tier.T7);
+      var luna = Lunaire.ofTier(HeroTier.T7);
       luna.addBooster(t4SwordStatBoost);
       expect(luna.getStats().attack, 1439);
     });
 
     test("T1 Lyca", () {
-      expect(Lyca.ofTier(Tier.T1).getStats().attack, 171);
+      expect(Lyca.ofTier(HeroTier.T1).getStats().attack, 171);
     });
 
     test("T1 Lyca T1 Sword", () {
-      var lyca = Lyca.ofTier(Tier.T1);
+      var lyca = Lyca.ofTier(HeroTier.T1);
       lyca.addBooster(t1SwordStatBoost);
       expect(lyca.getStats().attack, 192);
     });
 
     test("T2 Lyca T1 Sword", () {
-      var lyca = Lyca.ofTier(Tier.T2);
+      var lyca = Lyca.ofTier(HeroTier.T2);
       lyca.addBooster(t1SwordStatBoost);
       expect(lyca.getStats().attack, 318);
     });
 
     test("T4 Lyca", () {
-      expect(Lyca.ofTier(Tier.T4).getStats().attack, 616);
+      expect(Lyca.ofTier(HeroTier.T4).getStats().attack, 616);
     });
 
     test("T5 Lyca", () {
-      expect(Lyca.ofTier(Tier.T5).getStats().attack, 821);
+      expect(Lyca.ofTier(HeroTier.T5).getStats().attack, 821);
     });
 
     test("T6 Lyca", () {
-      expect(Lyca.ofTier(Tier.T6).getStats().attack, 1027);
+      expect(Lyca.ofTier(HeroTier.T6).getStats().attack, 1027);
     });
 
     test("T6 Lyca T2 Sword", () {
-      var lyca = Lyca.ofTier(Tier.T6);
+      var lyca = Lyca.ofTier(HeroTier.T6);
       lyca.addBooster(t2SwordStatBoost);
       expect(lyca.getStats().attack, 1218);
     });
 
     test("T7 Lyca T2 Sword", () {
-      var lyca = Lyca.ofTier(Tier.T7);
+      var lyca = Lyca.ofTier(HeroTier.T7);
       lyca.addBooster(t2SwordStatBoost);
       expect(lyca.getStats().attack, 1421);
     });
 
     test("T6 Luna buffed T7 Lyca + T2 Sword", () {
-      var lyca = Lyca.ofTier(Tier.T7);
+      var lyca = Lyca.ofTier(HeroTier.T7);
       lyca.addBooster(t2SwordStatBoost);
 
-      var luna = Lunaire.ofTier(Tier.T6) as LinkingHero;
+      var luna = Lunaire.ofTier(HeroTier.T6) as LinkingHero;
       var finalStats = luna.buff(lyca);
 
       expect(finalStats.attack, 2596);
