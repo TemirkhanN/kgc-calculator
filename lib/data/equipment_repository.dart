@@ -10,7 +10,9 @@ class EquipmentRepository {
     var raw = storage.getAll();
 
     // TODO this is inefficient and silly, but it's a better trade-off compared to alternative where one can try to persist whole objects into storage
-    return raw.keys.map((id) => _unmarshall(id, raw[id])).toList(growable: false);
+    return raw.keys
+        .map((id) => _unmarshall(id, raw[id]))
+        .toList(growable: false);
   }
 
   Equipment getById(String id) {
@@ -21,14 +23,21 @@ class EquipmentRepository {
     storage.save(
         equipment.id,
         jsonEncode({
-          'type': equipment.type().toString(),
-          'tier': equipment.tier().toString(),
+          'type': equipment.type().name,
+          'tier': equipment.tier().name,
+          'effects': equipment
+              .listSpecialEffects()
+              .map((ef) => ef.name)
+              .toList(growable: false),
         }));
   }
 
   Equipment _unmarshall(String id, String rawData) {
     var data = jsonDecode(rawData);
 
-    return Equipment.fromRaw(id, data['type'], data['tier']);
+    var effects = data['effects'] ?? [];
+
+    return Equipment.fromRaw(id, data['type'], data['tier'],
+        specialEffects: List<String>.from(effects));
   }
 }

@@ -17,6 +17,8 @@ class _EquipmentCreatorState extends State<EquipmentCreator> {
   String? _equipmentId;
   Tier _tier = Tier.T1;
   EquipmentType? _type;
+  EquipmentSpecialEffect? _specialEffect;
+
   final EquipmentRepository _repository = EquipmentRepository();
 
   @override
@@ -25,9 +27,15 @@ class _EquipmentCreatorState extends State<EquipmentCreator> {
         appBar: AppBar(title: const Text('Equipment builder')),
         body: Center(
             child: Column(children: [
-          const Text("Here you can create equipment presets for further usage in calculator"),
+          const Text(
+              "Here you can create equipment presets for further usage in calculator"),
           DropdownButton(
-            items: _repository.findAll().map((item) => DropdownMenuItem(value: item.id, child: Text("${item.tier().name} ${item.name()}"))).toList(growable: false),
+            items: _repository
+                .findAll()
+                .map((item) => DropdownMenuItem(
+                    value: item.id,
+                    child: Text("${item.tier().name} ${item.name()}")))
+                .toList(growable: false),
             onChanged: (id) => {
               setState(() {
                 _equipmentId = id;
@@ -41,13 +49,16 @@ class _EquipmentCreatorState extends State<EquipmentCreator> {
                 _equipmentId = equipment.id;
                 _tier = equipment.tier();
                 _type = equipment.type();
+                _specialEffect = equipment.listSpecialEffects().firstOrNull;
               })
             },
             hint: const Text("Edit existing"),
           ),
-          KgcFormFactory.createTierSelector(value: _tier, onchange: _setEquipmentTier),
+          KgcFormFactory.createTierSelector(
+              value: _tier, onchange: _setEquipmentTier),
           DropdownButton(
               value: _type,
+              hint: const Text("Item type"),
               items: EquipmentType.values
                   .map((eType) => DropdownMenuItem(
                         value: eType,
@@ -55,6 +66,19 @@ class _EquipmentCreatorState extends State<EquipmentCreator> {
                       ))
                   .toList(growable: false),
               onChanged: (newValue) => _setEquipmentType(newValue!)),
+          DropdownButton(
+              value: _specialEffect,
+              hint: const Text("Special effect"),
+              items: EquipmentSpecialEffect.values
+                  .where((effect) =>
+                      _type != null && effect.isApplicableTo(_type!, _tier))
+                  .map((eSpecEffect) {
+                return DropdownMenuItem(
+                  value: eSpecEffect,
+                  child: Text(eSpecEffect.name),
+                );
+              }).toList(growable: false),
+              onChanged: (newValue) => _setEquipmentSpecialEffect(newValue!)),
           ElevatedButton(
               onPressed: () {
                 if (_type == null) {
@@ -69,15 +93,22 @@ class _EquipmentCreatorState extends State<EquipmentCreator> {
 
                 Equipment savingEquipment;
                 if (_equipmentId == null) {
-                  savingEquipment = Equipment(EquipmentPrototype(_type!, _tier));
+                  savingEquipment = Equipment(EquipmentPrototype(_type!, _tier),
+                      specialEffects:
+                          _specialEffect != null ? [_specialEffect!] : []);
                 } else {
-                  savingEquipment = Equipment.fromRaw(_equipmentId!, _type.toString(), _tier.toString());
+                  savingEquipment = Equipment.fromRaw(
+                      _equipmentId!, _type!.name, _tier.name,
+                      specialEffects:
+                          _specialEffect != null ? [_specialEffect!.name] : []);
                 }
 
                 _repository.save(savingEquipment);
                 setState(_resetInput);
                 // TODO this is odd. Add lacks theme configuration since snackbar is white
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Saved to storage. You can now use it in calculator.")));
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text(
+                        "Saved to storage. You can now use it in calculator.")));
               },
               child: const Text("Save"))
         ])));
@@ -86,6 +117,7 @@ class _EquipmentCreatorState extends State<EquipmentCreator> {
   void _resetInput() {
     _tier = Tier.T1;
     _type = null;
+    _specialEffect = null;
   }
 
   void _setEquipmentTier(Tier newTier) {
@@ -94,5 +126,9 @@ class _EquipmentCreatorState extends State<EquipmentCreator> {
 
   void _setEquipmentType(EquipmentType newType) {
     setState(() => _type = newType);
+  }
+
+  void _setEquipmentSpecialEffect(EquipmentSpecialEffect newEffect) {
+    setState(() => _specialEffect = newEffect);
   }
 }

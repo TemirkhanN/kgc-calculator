@@ -83,21 +83,107 @@ class EquipmentPrototype {
   }
 }
 
+enum EquipmentSpecialEffect {
+  extraAttack25,
+  extraAttack50,
+  extraAttack75,
+  extraAttackSpeed40,
+  extraAttackSpeed80,
+  extraAttackSpeed120,
+  extraAttackCount,
+  extraDamageEveryXAttack,
+}
+
+extension SpecialAffectApplicator on EquipmentSpecialEffect {
+  bool isApplicableTo(EquipmentType type, Tier ofTier) {
+    switch (type) {
+      case EquipmentType.bow:
+        return _canBowHaveThisEffect(ofTier);
+      case EquipmentType.staff:
+        return false;
+      case EquipmentType.sword:
+        return _canSwordHaveThisEffect(ofTier);
+      case EquipmentType.armor:
+        return false;
+    }
+  }
+
+  bool _canBowHaveThisEffect(Tier bowTier) {
+    if (bowTier == Tier.T1) {
+      return false;
+    }
+
+    if (this == EquipmentSpecialEffect.extraAttackSpeed40) {
+      return true;
+    }
+
+    if (this == EquipmentSpecialEffect.extraAttackSpeed80) {
+      return bowTier == Tier.T3 || bowTier == Tier.T4;
+    }
+
+    if (this == EquipmentSpecialEffect.extraAttackSpeed120) {
+      return bowTier == Tier.T4;
+    }
+
+    if (this == EquipmentSpecialEffect.extraAttackCount && bowTier == Tier.T4) {
+      return true;
+    }
+
+    return false;
+  }
+
+  bool _canSwordHaveThisEffect(Tier swordTier) {
+    if (swordTier == Tier.T1) {
+      return false;
+    }
+
+    if (this == EquipmentSpecialEffect.extraAttack25) {
+      return true;
+    }
+
+    if (this == EquipmentSpecialEffect.extraAttack50) {
+      return swordTier == Tier.T3 || swordTier == Tier.T4;
+    }
+
+    if (this == EquipmentSpecialEffect.extraAttack75) {
+      return swordTier == Tier.T4;
+    }
+
+    if (this == EquipmentSpecialEffect.extraDamageEveryXAttack) {
+      return swordTier == Tier.T4;
+    }
+
+    return false;
+  }
+}
+
 class Equipment {
   late final String id;
   final EquipmentPrototype _prototype;
+  late final List<EquipmentSpecialEffect> _specialEffects;
 
-  Equipment(this._prototype, {String? id}) {
+  Equipment(this._prototype,
+      {String? id, List<EquipmentSpecialEffect>? specialEffects}) {
     this.id = id ?? const UuidV4().generate();
+    this._specialEffects = specialEffects ?? [];
   }
 
-  // TODO refactor StatBooster and apply boosts here
-  factory Equipment.fromRaw(String id, String equipmentType, String tierName) {
+  factory Equipment.fromRaw(String id, String equipmentType, String tierName,
+      {List<String>? specialEffects}) {
     EquipmentType type =
-        EquipmentType.values.firstWhere((e) => e.toString() == equipmentType);
-    Tier tier = Tier.values.firstWhere((e) => e.toString() == tierName);
+        EquipmentType.values.firstWhere((e) => e.name == equipmentType);
+    Tier tier = Tier.values.firstWhere((e) => e.name == tierName);
 
-    return Equipment(id: id, EquipmentPrototype(type, tier));
+    List<EquipmentSpecialEffect> effects = [];
+    if (specialEffects != null) {
+      effects = specialEffects
+          .map((rawEffect) => EquipmentSpecialEffect.values
+              .firstWhere((e) => e.name == rawEffect))
+          .toList(growable: false);
+    }
+
+    return Equipment(
+        id: id, EquipmentPrototype(type, tier), specialEffects: effects);
   }
 
   String name() {
@@ -114,5 +200,9 @@ class Equipment {
 
   StatBooster statBonus() {
     return _prototype.statBooster();
+  }
+
+  List<EquipmentSpecialEffect> listSpecialEffects() {
+    return _specialEffects;
   }
 }
