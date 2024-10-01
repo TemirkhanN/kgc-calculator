@@ -3,43 +3,48 @@ import 'package:god_king_castle_calculator/hero/tier.dart';
 import 'package:uuid/v4.dart';
 
 extension EquipmentBoostExtension on Tier {
+  static final Map<Tier, int> _bowBonus = {
+    Tier.T1: 25,
+    Tier.T2: 40,
+    Tier.T3: 70,
+    Tier.T4: 120,
+  };
+
+  static final Map<Tier, int> _staffBonus = {
+    Tier.T1: 40,
+    Tier.T2: 70,
+    Tier.T3: 120,
+    Tier.T4: 200,
+  };
+
+  static final Map<Tier, int> _swordBonus = {
+    Tier.T1: 13,
+    Tier.T2: 20,
+    Tier.T3: 35,
+    Tier.T4: 60,
+  };
+
+  static final Map<Tier, int> _armorBonus = {
+    Tier.T1: 13,
+    Tier.T2: 20,
+    Tier.T3: 35,
+    Tier.T4: 60,
+  };
+
   StatBooster getBowBonus() {
-    switch (this) {
-      case Tier.T1:
-        return StatBooster.attackSpeed(25);
-      case Tier.T2:
-        return StatBooster.attackSpeed(40);
-      case Tier.T3:
-        return StatBooster.attackSpeed(70);
-      case Tier.T4:
-        return StatBooster.attackSpeed(120);
-    }
+    return StatBooster.attackSpeed(_bowBonus[this]!);
   }
 
   StatBooster getSwordBonus() {
-    switch (this) {
-      case Tier.T1:
-        return StatBooster.attack(13);
-      case Tier.T2:
-        return StatBooster.attack(20);
-      case Tier.T3:
-        return StatBooster.attack(35);
-      case Tier.T4:
-        return StatBooster.attack(60);
-    }
+    return StatBooster.attack(_swordBonus[this]!);
   }
 
   StatBooster getStaffBonus() {
-    switch (this) {
-      case Tier.T1:
-        return StatBooster.spell(40);
-      case Tier.T2:
-        return StatBooster.spell(70);
-      case Tier.T3:
-        return StatBooster.spell(120);
-      case Tier.T4:
-        return StatBooster.spell(200);
-    }
+    return StatBooster.spell(_staffBonus[this]!);
+  }
+
+  StatBooster getArmorBonus() {
+    return StatBooster.hp(_armorBonus[this]!);
   }
 }
 
@@ -47,6 +52,7 @@ enum EquipmentType {
   bow,
   staff,
   sword,
+  armor,
 }
 
 // TODO make it internal
@@ -71,6 +77,8 @@ class EquipmentPrototype {
         return tier.getSwordBonus();
       case EquipmentType.staff:
         return tier.getStaffBonus();
+      case EquipmentType.armor:
+        return tier.getArmorBonus();
     }
   }
 }
@@ -85,7 +93,8 @@ class Equipment {
 
   // TODO refactor StatBooster and apply boosts here
   factory Equipment.fromRaw(String id, String equipmentType, String tierName) {
-    EquipmentType type = EquipmentType.values.firstWhere((e) => e.toString() == equipmentType);
+    EquipmentType type =
+        EquipmentType.values.firstWhere((e) => e.toString() == equipmentType);
     Tier tier = Tier.values.firstWhere((e) => e.toString() == tierName);
 
     return Equipment(id: id, EquipmentPrototype(type, tier));
