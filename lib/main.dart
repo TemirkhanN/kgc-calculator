@@ -13,6 +13,10 @@ void main() async {
       home: const Calculator()));
 }
 
-void openPage(Widget page, BuildContext withContext) {
-  Navigator.push(withContext, MaterialPageRoute(builder: (context) => page));
+Future openPage(Widget page, BuildContext withContext) {
+  return Navigator.push(withContext, MaterialPageRoute(builder: (context) => page));
+}
+
+void returnToPreviousPage(BuildContext withContext, {dynamic withResult}) {
+  Navigator.pop(withContext, withResult);
 }

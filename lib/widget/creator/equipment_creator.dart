@@ -32,8 +32,7 @@ class _EquipmentCreatorState extends State<EquipmentCreator> {
               setState(() {
                 _equipmentId = id;
                 if (_equipmentId == null) {
-                  _tier = Tier.T1;
-                  _type = null;
+                  _resetInput();
 
                   return;
                 }
@@ -76,12 +75,17 @@ class _EquipmentCreatorState extends State<EquipmentCreator> {
                 }
 
                 _repository.save(savingEquipment);
-                _equipmentId = savingEquipment.id;
+                setState(_resetInput);
                 // TODO this is odd. Add lacks theme configuration since snackbar is white
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Saved to storage. You can now use it in calculator.")));
               },
               child: const Text("Save"))
         ])));
+  }
+
+  void _resetInput() {
+    _tier = Tier.T1;
+    _type = null;
   }
 
   void _setEquipmentTier(Tier newTier) {
