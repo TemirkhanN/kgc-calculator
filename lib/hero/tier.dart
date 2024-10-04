@@ -2,25 +2,6 @@ import 'package:god_king_castle_calculator/hero/hero.dart';
 
 enum Tier { T1, T2, T3, T4 }
 
-extension TierComparator on Tier {
-  bool isHigher(Tier than) {
-    return toValue() > than.toValue();
-  }
-
-  int toValue() {
-    switch (this) {
-      case Tier.T1:
-        return 1;
-      case Tier.T2:
-        return 2;
-      case Tier.T3:
-        return 4;
-      case Tier.T4:
-        return 4;
-    }
-  }
-}
-
 enum HeroTier {
   T1,
   T2,

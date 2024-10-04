@@ -95,6 +95,7 @@ enum EquipmentSpecialEffect {
 }
 
 extension SpecialAffectApplicator on EquipmentSpecialEffect {
+  // TODO replace with some {type => effect} mapping or specifications
   bool isApplicableTo(EquipmentType type, Tier ofTier) {
     switch (type) {
       case EquipmentType.bow:
@@ -162,28 +163,21 @@ class Equipment {
   final EquipmentPrototype _prototype;
   late final List<EquipmentSpecialEffect> _specialEffects;
 
-  Equipment(this._prototype,
-      {String? id, List<EquipmentSpecialEffect>? specialEffects}) {
+  Equipment(this._prototype, {String? id, List<EquipmentSpecialEffect>? specialEffects}) {
     this.id = id ?? const UuidV4().generate();
     this._specialEffects = specialEffects ?? [];
   }
 
-  factory Equipment.fromRaw(String id, String equipmentType, String tierName,
-      {List<String>? specialEffects}) {
-    EquipmentType type =
-        EquipmentType.values.firstWhere((e) => e.name == equipmentType);
+  factory Equipment.fromRaw(String id, String equipmentType, String tierName, {List<String>? specialEffects}) {
+    EquipmentType type = EquipmentType.values.firstWhere((e) => e.name == equipmentType);
     Tier tier = Tier.values.firstWhere((e) => e.name == tierName);
 
     List<EquipmentSpecialEffect> effects = [];
     if (specialEffects != null) {
-      effects = specialEffects
-          .map((rawEffect) => EquipmentSpecialEffect.values
-              .firstWhere((e) => e.name == rawEffect))
-          .toList(growable: false);
+      effects = specialEffects.map((rawEffect) => EquipmentSpecialEffect.values.firstWhere((e) => e.name == rawEffect)).toList(growable: false);
     }
 
-    return Equipment(
-        id: id, EquipmentPrototype(type, tier), specialEffects: effects);
+    return Equipment(id: id, EquipmentPrototype(type, tier), specialEffects: effects);
   }
 
   String name() {
@@ -199,7 +193,24 @@ class Equipment {
   }
 
   StatBooster statBonus() {
-    return _prototype.statBooster();
+    var additionalBonuses = [];
+
+    const types = {
+      EquipmentSpecialEffect.extraAttack25: StatBooster(attack: 25),
+      EquipmentSpecialEffect.extraAttack50: StatBooster(attack: 50),
+      EquipmentSpecialEffect.extraAttack75: StatBooster(attack: 75),
+      EquipmentSpecialEffect.extraAttackSpeed40: StatBooster(aSpeed: 40),
+      EquipmentSpecialEffect.extraAttackSpeed80: StatBooster(aSpeed: 80),
+      EquipmentSpecialEffect.extraAttackSpeed120: StatBooster(aSpeed: 120),
+    };
+
+    for (var effect in _specialEffects) {
+      if (types.containsKey(effect)) {
+        additionalBonuses.add(types[effect]);
+      }
+    }
+
+    return StatBooster.combine([...additionalBonuses, _prototype.statBooster()]);
   }
 
   List<EquipmentSpecialEffect> listSpecialEffects() {
