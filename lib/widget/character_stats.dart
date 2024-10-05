@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:god_king_castle_calculator/hero/equipment.dart';
 import 'package:god_king_castle_calculator/hero/hero.dart' as heroDomain;
 
 class StatsWidget extends StatelessWidget {
@@ -15,9 +16,9 @@ class StatsWidget extends StatelessWidget {
         children: [
           Text(summary),
           Text("♥: ${stats.hp}"),
-          Text("🗡: ${stats.attack}"),
+          Text("🗡: ${stats.attack}${stats.attackCount > 1 ? "x${stats.attackCount}" : ""}"),
           Text("🪄: ${stats.spellPower}"),
-          Text("🏹 : ${stats.attackSpeed}%"),
+          Text("🏹 : ${stats.attackSpeed / 100}"),
         ],
       ),
     );
@@ -43,6 +44,8 @@ class DpsWidget extends StatelessWidget {
 }
 
 class _HeroDamageEstimator {
+  static const double extraAttackMultiplier = 0.7;
+
   final heroDomain.Hero hero;
 
   const _HeroDamageEstimator(this.hero);
@@ -53,24 +56,48 @@ class _HeroDamageEstimator {
     var performedAttacks = simulate(timeInterval);
 
     return (performedAttacks.reduce((int value, sum) => value + sum) / timeInterval).round();
-
-    /*
-    double x2bonusEvery5Attacks = totalAttacksPerformed / 5;
-
-    return (((x2bonusEvery5Attacks * heroStats.attack * 2) + ((totalAttacksPerformed - x2bonusEvery5Attacks) * heroStats.attack)) / timeInterval).round();
-     */
   }
 
   List<int> simulate(int intervalInSeconds) {
     var heroStats = hero.getStats();
 
+    bool hasXDmgEveryYAttack = false;
+    const int yAttack = 5;
+    const double xDmgMultiplier = 2.0;
+    bool hasExtraAttack = false;
+    for (var equipment in hero.equipmentList) {
+      for (var specialEffect in equipment.listSpecialEffects()) {
+        if (specialEffect == EquipmentSpecialEffect.extraAttackCount) {
+          hasExtraAttack = true;
+        }
+
+        if (specialEffect == EquipmentSpecialEffect.extraDamageEveryXAttack) {
+          hasXDmgEveryYAttack = true;
+        }
+      }
+    }
+
     double attacksPerSecond = heroStats.attackSpeed / 100;
     double totalAttacksPerformed = intervalInSeconds * attacksPerSecond;
-    totalAttacksPerformed *= heroStats.attackCount;
+    int attackCountPerHit = heroStats.attackCount;
+    if (hasExtraAttack) {
+      attackCountPerHit++;
+    }
+
+    totalAttacksPerformed *= attackCountPerHit;
 
     List<int> summary = [];
     for (var i = 0; i < totalAttacksPerformed; i++) {
-      summary.add(heroStats.attackCount * heroStats.attack);
+      double damageMultiplier = 1;
+      if (hasExtraAttack && i % heroStats.attackCount == 0) {
+        damageMultiplier = extraAttackMultiplier;
+      }
+
+      if (hasXDmgEveryYAttack && i % yAttack == 0) {
+        damageMultiplier *= xDmgMultiplier;
+      }
+
+      summary.add((heroStats.attack * damageMultiplier).round());
     }
 
     return summary;
