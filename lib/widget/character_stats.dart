@@ -1,6 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:god_king_castle_calculator/hero/equipment.dart';
 import 'package:god_king_castle_calculator/hero/hero.dart' as heroDomain;
+import 'package:god_king_castle_calculator/hero/tier.dart';
+
+import '../data.dart';
 
 class StatsWidget extends StatelessWidget {
   final String summary;
@@ -37,7 +40,7 @@ class DpsWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("DPS(dumb): ${estimator.getDPS()}"),
+        Text("DPS(rough): ${estimator.getDPS()}"),
       ],
     );
   }
@@ -86,6 +89,8 @@ class _HeroDamageEstimator {
 
     totalAttacksPerformed *= attackCountPerHit;
 
+    var heroSkillDamageAmplifier = hero.getDamageAmplifier();
+
     List<int> summary = [];
     for (var i = 0; i < totalAttacksPerformed; i++) {
       double damageMultiplier = 1;
@@ -97,9 +102,49 @@ class _HeroDamageEstimator {
         damageMultiplier *= xDmgMultiplier;
       }
 
-      summary.add((heroStats.attack * damageMultiplier).round());
+      summary.add(heroSkillDamageAmplifier.apply(i, heroStats.attack * damageMultiplier).round());
     }
 
     return summary;
+  }
+}
+
+extension _HeroSkillAmplifier on heroDomain.Hero {
+  _XDamageEveryYAttackAmplifier getDamageAmplifier() {
+    if (CharacterName.sargula.get().name == name) {
+      var spellStatBoost = getStats().spellPower / 16.66;
+      switch (tier.toSkillTier()) {
+        case Tier.T1:
+          return _XDamageEveryYAttackAmplifier(3, RatioModifier((250 + spellStatBoost) / 100));
+        case Tier.T2:
+          return _XDamageEveryYAttackAmplifier(3, RatioModifier((275 + spellStatBoost) / 100));
+        case Tier.T3:
+          return _XDamageEveryYAttackAmplifier(3, RatioModifier((300 + spellStatBoost) / 100));
+        case Tier.T4:
+          return _XDamageEveryYAttackAmplifier(3, RatioModifier((325 + spellStatBoost) / 100));
+      }
+    }
+
+    if (CharacterName.mel.get().name == name) {
+      var spellStatBoost = getStats().spellPower / 50;
+      return _XDamageEveryYAttackAmplifier(1, RatioModifier((225 + spellStatBoost) / 100));
+    }
+
+    return const _XDamageEveryYAttackAmplifier(1, RatioModifier(1));
+  }
+}
+
+class _XDamageEveryYAttackAmplifier {
+  final int everyXAttack;
+  final RatioModifier modifier;
+
+  const _XDamageEveryYAttackAmplifier(this.everyXAttack, this.modifier);
+
+  num apply(int currentAttackCount, num attackDamage) {
+    if (currentAttackCount % everyXAttack != 0) {
+      return attackDamage;
+    }
+
+    return modifier.ratio * attackDamage;
   }
 }
