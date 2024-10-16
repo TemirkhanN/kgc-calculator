@@ -1,3 +1,4 @@
+import 'package:god_king_castle_calculator/data.dart';
 import 'package:god_king_castle_calculator/hero/equipment.dart';
 import 'package:god_king_castle_calculator/hero/skill.dart';
 import 'package:god_king_castle_calculator/hero/tier.dart';
@@ -9,11 +10,13 @@ class BaseStats {
   final int attackSpeed;
   final int attackCount;
 
-  const BaseStats(this.hp, this.attack, this.spellPower, this.attackSpeed, {this.attackCount = 1});
+  const BaseStats(this.hp, this.attack, this.spellPower, this.attackSpeed,
+      {this.attackCount = 1});
 }
 
 class Stats extends BaseStats {
-  const Stats(super.hp, super.attack, super.spellPower, super.attackSpeed, {super.attackCount});
+  const Stats(super.hp, super.attack, super.spellPower, super.attackSpeed,
+      {super.attackCount});
 }
 
 class StatBooster {
@@ -22,7 +25,8 @@ class StatBooster {
   final int aSpeed;
   final int hp;
 
-  const StatBooster({this.attack = 0, this.spell = 0, this.aSpeed = 0, this.hp = 0});
+  const StatBooster(
+      {this.attack = 0, this.spell = 0, this.aSpeed = 0, this.hp = 0});
 
   factory StatBooster.attackSpeed(int attackSpeedBonus) {
     return StatBooster(aSpeed: attackSpeedBonus);
@@ -52,17 +56,31 @@ class StatBooster {
       hpBoost += booster.hp;
     }
 
-    return StatBooster(attack: attackBoost, spell: spellBoost, aSpeed: attackSpeedBoost, hp: hpBoost);
+    return StatBooster(
+        attack: attackBoost,
+        spell: spellBoost,
+        aSpeed: attackSpeedBoost,
+        hp: hpBoost);
   }
 
   Stats applyTo(Stats stats) {
     var bonusStats = calculateBonus(stats);
 
-    return Stats(stats.hp + bonusStats.hp, stats.attack + bonusStats.attack, stats.spellPower + bonusStats.spellPower, stats.attackSpeed + bonusStats.attackSpeed, attackCount: stats.attackCount);
+    return Stats(
+        stats.hp + bonusStats.hp,
+        stats.attack + bonusStats.attack,
+        stats.spellPower + bonusStats.spellPower,
+        stats.attackSpeed + bonusStats.attackSpeed,
+        attackCount: stats.attackCount);
   }
 
   Stats calculateBonus(Stats stats) {
-    return Stats((stats.hp * _hpRatio()).round(), (stats.attack * _attackRatio()).round(), (stats.spellPower * _spellRatio()).round(), (stats.attackSpeed * _aSpeedRatio()).ceil(), attackCount: 0);
+    return Stats(
+        (stats.hp * _hpRatio()).round(),
+        (stats.attack * _attackRatio()).round(),
+        (stats.spellPower * _spellRatio()).round(),
+        (stats.attackSpeed * _aSpeedRatio()).ceil(),
+        attackCount: 0);
   }
 
   double _attackRatio() {
@@ -91,7 +109,9 @@ class Hero {
 
   Hero(this.name, this.baseStats) : tier = HeroTier.T1;
 
-  Hero._(this.name, this.baseStats, {Map<String, StatBooster>? statsBoosters, this.tier = HeroTier.T1}) : _statsBoosters = statsBoosters ?? {};
+  Hero._(this.name, this.baseStats,
+      {Map<String, StatBooster>? statsBoosters, this.tier = HeroTier.T1})
+      : _statsBoosters = statsBoosters ?? {};
 
   BaseStats getBaseStats() {
     return baseStats;
@@ -115,14 +135,16 @@ class Hero {
 
     var statBonus = equipment.statBonus();
     if (_statsBoosters.containsKey("equipment")) {
-      _statsBoosters["equipment"] = StatBooster.combine([_statsBoosters["equipment"]!, statBonus]);
+      _statsBoosters["equipment"] =
+          StatBooster.combine([_statsBoosters["equipment"]!, statBonus]);
     } else {
       _statsBoosters["equipment"] = statBonus;
     }
   }
 
   Hero ofTier(HeroTier tier) {
-    var hero = Hero._(name, baseStats, statsBoosters: Map.of(_statsBoosters), tier: tier);
+    var hero = Hero._(name, baseStats,
+        statsBoosters: Map.of(_statsBoosters), tier: tier);
 
     equipmentList.forEach(hero.equip);
 
@@ -132,13 +154,64 @@ class Hero {
   Stats getStats() {
     Stats tieredStats = tier.applyToStats(baseStats);
     // Because attack speed bonuses are applied over base(T1) stat!!!! >:(
-    var tieredStatsExceptAttackSpeed = Stats(tieredStats.hp, tieredStats.attack, tieredStats.spellPower, baseStats.attackSpeed, attackCount: tieredStats.attackCount);
+    var tieredStatsExceptAttackSpeed = Stats(tieredStats.hp, tieredStats.attack,
+        tieredStats.spellPower, baseStats.attackSpeed,
+        attackCount: tieredStats.attackCount);
 
-    var bonusStats = StatBooster.combine([..._statsBoosters.values]).calculateBonus(tieredStatsExceptAttackSpeed);
+    var bonusStats = StatBooster.combine([..._statsBoosters.values])
+        .calculateBonus(tieredStatsExceptAttackSpeed);
 
-    return Stats(tieredStatsExceptAttackSpeed.hp + bonusStats.hp, tieredStatsExceptAttackSpeed.attack + bonusStats.attack, tieredStatsExceptAttackSpeed.spellPower + bonusStats.spellPower,
-        (tieredStatsExceptAttackSpeed.attackSpeed * tier.getAttackSpeedModifier().ratio).round() + bonusStats.attackSpeed,
-        attackCount: tieredStatsExceptAttackSpeed.attackCount);
+    int finalAttackCount = tieredStatsExceptAttackSpeed.attackCount;
+
+    int finalAttackSpeed = (tieredStatsExceptAttackSpeed.attackSpeed *
+                tier.getAttackSpeedModifier().ratio)
+            .round() +
+        bonusStats.attackSpeed;
+
+    // Ian is a channeling hero, hence, his attack speed is always the same
+    // attacking once in every 1.5 seconds
+    // TODO this has to be a bit different
+    if (this == CharacterName.ian.get()) {
+      var ianChargeTime = 1.5;
+      const ianAttackTime = 1;
+      switch (tier.toSkillTier()) {
+        case Tier.T1:
+          ianChargeTime -= 0.1;
+          finalAttackCount += 2;
+        case Tier.T2:
+          ianChargeTime -= 0.2;
+          finalAttackCount += 3;
+        case Tier.T3:
+          ianChargeTime -= 0.3;
+          finalAttackCount += 4;
+        case Tier.T4:
+          ianChargeTime -= 0.5;
+          finalAttackCount += 5;
+      }
+
+      // Ian performs his slashes for 1 second after charge. Regardless of amount of slashes
+      // I.e. Tier7 Ian performs 5 slashes for 1second after 1 charging for second. Which summarizes
+      // as 2 seconds.
+      finalAttackSpeed = ((1 / (ianAttackTime + ianChargeTime)) * 100).round();
+    }
+
+    return Stats(
+        tieredStatsExceptAttackSpeed.hp + bonusStats.hp,
+        tieredStatsExceptAttackSpeed.attack + bonusStats.attack,
+        tieredStatsExceptAttackSpeed.spellPower + bonusStats.spellPower,
+        finalAttackSpeed,
+        attackCount: finalAttackCount);
+  }
+
+  int getRealAttackSpeed() {
+    return getStats().attackSpeed;
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! Hero) return false;
+
+    return name == other.name;
   }
 }
 
@@ -158,16 +231,24 @@ class LinkingHero extends Hero {
   }
 
   Stats buff(Hero target) {
-    LinkEffect buff = _linkBuff.firstWhere((boost) => boost.skillTier == tier.toSkillTier());
+    LinkEffect buff =
+        _linkBuff.firstWhere((boost) => boost.skillTier == tier.toSkillTier());
 
     var targetStats = target.getStats();
 
     var myRawStats = tier.applyToStats(target.baseStats);
     // Beware, if at some point some hero starts buffing attack speed, this needs to be adjusted
-    var myBoostedStats = StatBooster.combine([..._statsBoosters.values]).applyTo(myRawStats);
-    var bonusStats = StatBooster.combine([buff.statsBonus]).calculateBonus(myBoostedStats);
+    var myBoostedStats =
+        StatBooster.combine([..._statsBoosters.values]).applyTo(myRawStats);
+    var bonusStats =
+        StatBooster.combine([buff.statsBonus]).calculateBonus(myBoostedStats);
 
-    return Stats(targetStats.hp, (bonusStats.attack / target.baseStats.attackCount).round() + targetStats.attack, bonusStats.spellPower + targetStats.spellPower, targetStats.attackSpeed,
+    return Stats(
+        targetStats.hp,
+        (bonusStats.attack / target.baseStats.attackCount).round() +
+            targetStats.attack,
+        bonusStats.spellPower + targetStats.spellPower,
+        targetStats.attackSpeed,
         attackCount: targetStats.attackCount);
   }
 }
