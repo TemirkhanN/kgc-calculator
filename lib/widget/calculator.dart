@@ -31,6 +31,9 @@ class _CalculatorState extends State<Calculator> {
   hero_domain.Hero? _hero;
   Map<int, Equipment?> equipmentSlots = {1: null, 2: null, 3: null};
 
+  hero_domain.LinkingHero? _buffer;
+  HeroTier _bufferTier = HeroTier.T1;
+
   Widget statsSummary = StatsWidget.empty;
 
   final EquipmentRepository _equipmentRepository = EquipmentRepository();
@@ -48,6 +51,9 @@ class _CalculatorState extends State<Calculator> {
               onPressed: () => openPage(const EquipmentCreator(), context)
                   .then((val) => setState(() {})),
               child: const Text("Open equipment generator")),
+          const Text("Link hero"),
+          _bufferSelector(),
+          const Text("Main hero"),
           _heroSelector(),
           const SizedBox(height: 10),
           const Text("Relic bonuses"),
@@ -93,7 +99,7 @@ class _CalculatorState extends State<Calculator> {
 
     statsSummary = Column(children: [
       StatsWidget("Expected stats", adjustedHero.getStats()),
-      DpsWidget(adjustedHero),
+      DpsWidget(adjustedHero, buffer: _buffer?.ofTier(_bufferTier)),
     ]);
   }
 
@@ -191,8 +197,10 @@ class _CalculatorState extends State<Calculator> {
 
   Widget _heroSelector() {
     return Padding(
-        padding: const EdgeInsets.all(10),
-        child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+      padding: const EdgeInsets.all(10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
           KgcFormFactory.createHeroTierSelector(
               value: _heroTier,
               onchange: (newTier) {
@@ -204,6 +212,7 @@ class _CalculatorState extends State<Calculator> {
           const SizedBox(width: 10),
           DropdownButton(
             items: characters.entries
+                .where((c) => c.value is! hero_domain.LinkingHero)
                 .map((entry) => DropdownMenuItem(
                     value: entry.value, child: Text(entry.value.name)))
                 .toList(growable: false),
@@ -215,6 +224,49 @@ class _CalculatorState extends State<Calculator> {
               });
             },
           ),
-        ]));
+        ],
+      ),
+    );
+  }
+
+  Widget _bufferSelector() {
+    return Padding(
+      padding: const EdgeInsets.all(10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          KgcFormFactory.createHeroTierSelector(
+              value: _bufferTier,
+              onchange: (newTier) {
+                setState(() {
+                  _bufferTier = newTier;
+                  _recalculateStats();
+                });
+              }),
+          const SizedBox(width: 10),
+          DropdownButton(
+            items: characters.entries
+                .where((c) => c.value is hero_domain.LinkingHero)
+                .map(
+                  (entry) => DropdownMenuItem(
+                    value: entry.value,
+                    child: Text(entry.value.name),
+                  ),
+                )
+                .toList()
+              ..add(const DropdownMenuItem(child: Text("none"))),
+            value: _buffer,
+            onChanged: (hero_domain.Hero? selected) {
+              setState(() {
+                _buffer = selected != null
+                    ? selected as hero_domain.LinkingHero
+                    : null;
+                _recalculateStats();
+              });
+            },
+          ),
+        ],
+      ),
+    );
   }
 }

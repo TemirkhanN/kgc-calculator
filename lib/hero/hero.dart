@@ -105,9 +105,9 @@ class Hero {
   final BaseStats baseStats;
   Map<String, StatBooster> _statsBoosters = {};
   List<Equipment> equipmentList = [];
-  late final HeroTier tier;
+  final HeroTier tier;
 
-  Hero(this.name, this.baseStats) : tier = HeroTier.T1;
+  Hero(this.name, this.baseStats, {this.tier = HeroTier.T1});
 
   Hero._(this.name, this.baseStats,
       {Map<String, StatBooster>? statsBoosters, this.tier = HeroTier.T1})
@@ -218,14 +218,12 @@ class Hero {
 class LinkingHero extends Hero {
   final List<LinkEffect> _linkBuff;
 
-  LinkingHero(super.name, super.baseStats, this._linkBuff);
+  LinkingHero(super.name, super.baseStats, this._linkBuff, {super.tier});
 
   @override
-  Hero ofTier(HeroTier tier) {
-    var hero = LinkingHero(name, baseStats, _linkBuff);
+  LinkingHero ofTier(HeroTier tier) {
+    var hero = LinkingHero(name, baseStats, _linkBuff, tier: tier);
     hero._statsBoosters = Map.of(_statsBoosters);
-    // TODO had to add late modifier for the value. Feels wrong.
-    hero.tier = tier;
 
     return hero;
   }
@@ -243,9 +241,18 @@ class LinkingHero extends Hero {
     var bonusStats =
         StatBooster.combine([buff.statsBonus]).calculateBonus(myBoostedStats);
 
+    // Some characters have many attacks and providing them full buff
+    // means easily breaking game balance. Hence, they receive boost proportionally
+    // to their attack count
+    var attackDistributionDelta = target.baseStats.attackCount;
+    // Charging characters have no attack instances and considered as single attack heroes.
+    if (attackDistributionDelta == 0) {
+      attackDistributionDelta = 1;
+    }
+
     return Stats(
         targetStats.hp,
-        (bonusStats.attack / target.baseStats.attackCount).round() +
+        (bonusStats.attack / attackDistributionDelta).round() +
             targetStats.attack,
         bonusStats.spellPower + targetStats.spellPower,
         targetStats.attackSpeed,

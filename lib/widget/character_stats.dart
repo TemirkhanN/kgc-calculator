@@ -36,12 +36,13 @@ class StatsWidget extends StatelessWidget {
 
 class DpsWidget extends StatelessWidget {
   final hero_domain.Hero hero;
+  final hero_domain.LinkingHero? buffer;
 
-  const DpsWidget(this.hero, {super.key});
+  const DpsWidget(this.hero, {super.key, this.buffer});
 
   @override
   Widget build(BuildContext context) {
-    var estimator = _HeroDamageEstimator(hero);
+    var estimator = _HeroDamageEstimator(hero, buffer: buffer);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -57,8 +58,9 @@ class _HeroDamageEstimator {
   static const RatioModifier xAttackDamageModifier = RatioModifier(2);
 
   final hero_domain.Hero hero;
+  final hero_domain.LinkingHero? buffer;
 
-  const _HeroDamageEstimator(this.hero);
+  const _HeroDamageEstimator(this.hero, {this.buffer});
 
   int getDPS() {
     int timeInterval = 20; // seconds for better precision
@@ -76,7 +78,7 @@ class _HeroDamageEstimator {
   }
 
   List<int> simulate(int intervalInSeconds) {
-    var heroStats = hero.getStats();
+    var heroStats = buffer != null ? buffer!.buff(hero) : hero.getStats();
 
     var damageAmplifier = _SequentialAmplifier();
 
