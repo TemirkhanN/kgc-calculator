@@ -97,9 +97,11 @@ class _CalculatorState extends State<Calculator> {
       }
     }
 
+    var buffer = _buffer?.ofTier(_bufferTier);
     statsSummary = Column(children: [
-      StatsWidget("Expected stats", adjustedHero.getStats()),
-      DpsWidget(adjustedHero, buffer: _buffer?.ofTier(_bufferTier)),
+      StatsWidget("Expected stats",
+          buffer?.buff(adjustedHero) ?? adjustedHero.getStats()),
+      DpsWidget(adjustedHero, buffer: buffer),
     ]);
   }
 
