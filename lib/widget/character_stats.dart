@@ -42,7 +42,27 @@ class DpsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // TODO is it too much logic here?
+    Map<_RelicStat, hero_domain.Hero> combinationsWithTopRelicStats = {};
+    for (var relicStat in _RelicStat.values) {
+      var element = hero.ofTier(hero.tier);
+      element.setRelicBonus(relicStat.toStatBooster());
+      combinationsWithTopRelicStats[relicStat] = element;
+    }
+
     var estimation = _HeroDamageEstimator(hero, buffer: buffer).simulate(20);
+    _DamageEstimation? bestRelicCombination;
+    _RelicStat? bestRelicStat;
+    for (var topCombination in combinationsWithTopRelicStats.entries) {
+      var potential = _HeroDamageEstimator(topCombination.value, buffer: buffer)
+          .simulate(20);
+      if (bestRelicCombination == null ||
+          potential.getDPS() > bestRelicCombination.getDPS()) {
+        bestRelicCombination = potential;
+        bestRelicStat = topCombination.key;
+      }
+    }
+
     var estimationWithoutBuffer = _HeroDamageEstimator(hero).simulate(20);
 
     return Column(
@@ -57,24 +77,65 @@ class DpsWidget extends StatelessWidget {
         if (buffer != null)
           Text("DPS(without buffer): ${estimationWithoutBuffer.getDPS()}"),
         if (estimation.details != "") Text("Details: ${estimation.details}"),
+        if (bestRelicStat != null)
+          Text(
+              "Best relic stat: ${bestRelicStat.name} (${bestRelicCombination!.getDPS()} DPS)")
       ],
     );
+  }
+}
+
+enum _RelicStat {
+  attack,
+  attackSpeed,
+  spellPower,
+}
+
+extension _RelicLimitProvider on _RelicStat {
+  int getMaxTotal() {
+    // Relic may have 4 rows of stats
+    const totalRows = 4;
+
+    return totalRows * getMax();
+  }
+
+  int getMax() {
+    switch (this) {
+      case _RelicStat.attack:
+        return 12;
+      case _RelicStat.spellPower:
+        return 28;
+      case _RelicStat.attackSpeed:
+        return 24;
+    }
+  }
+
+  hero_domain.StatBooster toStatBooster() {
+    switch (this) {
+      case _RelicStat.attack:
+        return hero_domain.StatBooster.attack(getMaxTotal());
+      case _RelicStat.spellPower:
+        return hero_domain.StatBooster.spell(getMaxTotal());
+      case _RelicStat.attackSpeed:
+        return hero_domain.StatBooster.attackSpeed(getMaxTotal());
+    }
   }
 }
 
 class _DamageEstimation {
   final String details;
   final int intervalInSeconds;
-  final List<int> hits;
+  final int totalDamage;
 
-  const _DamageEstimation(this.hits, this.intervalInSeconds, this.details);
+  const _DamageEstimation(
+      this.totalDamage, this.intervalInSeconds, this.details);
 
   int getDPS() {
-    return (getDamage() / intervalInSeconds).round();
+    return (totalDamage / intervalInSeconds).round();
   }
 
   int getDamage() {
-    return hits.reduce((int value, sum) => value + sum);
+    return totalDamage;
   }
 }
 
@@ -107,13 +168,12 @@ class _HeroDamageEstimator {
       }
     }
 
-    double attacksPerSecond = heroStats.attackSpeed / 100;
-    double totalAttacksPerformed = intervalInSeconds * attacksPerSecond;
-    int attackCountPerHit = heroStats.attackCount;
     if (hasExtraAttack) {
-      attackCountPerHit++;
       damageAmplifier.last(
-        _XDamageEveryYAttackAmplifier(attackCountPerHit, extraAttackModifier),
+        _XDamageEveryYAttackAmplifier(
+          heroStats.attackCount + 1,
+          extraAttackModifier,
+        ),
       );
 
       details.add(
@@ -127,18 +187,31 @@ class _HeroDamageEstimator {
           "Deals %${xAttackDamageModifier.asPercentage()} damage every 5 attacks");
     }
 
-    totalAttacksPerformed *= attackCountPerHit;
-
     damageAmplifier.first(hero.getDamageAmplifier());
+
+    var summary = _simulate(intervalInSeconds, heroStats, damageAmplifier);
+    var totalDamage = summary.reduce((int value, sum) => value + sum);
+
+    return _DamageEstimation(
+        totalDamage, intervalInSeconds, details.join("\n"));
+  }
+
+  List<int> _simulate(int intervalInSeconds, hero_domain.Stats heroStats,
+      _Amplifier damageAmplifier) {
+    double attacksPerSecond = heroStats.attackSpeed / 100;
+    double totalAttacksPerformed = intervalInSeconds * attacksPerSecond;
+    totalAttacksPerformed *= heroStats.attackCount;
 
     List<int> summary = [];
     for (var i = 1; i <= totalAttacksPerformed; i++) {
       summary.add(
-        damageAmplifier.apply(heroStats.attack, i, attackCountPerHit).round(),
+        damageAmplifier
+            .apply(heroStats.attack, i, heroStats.attackCount)
+            .round(),
       );
     }
 
-    return _DamageEstimation(summary, intervalInSeconds, details.join("\n"));
+    return summary;
   }
 }
 
