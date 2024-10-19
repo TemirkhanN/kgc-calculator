@@ -42,14 +42,39 @@ class DpsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var estimator = _HeroDamageEstimator(hero, buffer: buffer);
+    var estimation = _HeroDamageEstimator(hero, buffer: buffer).simulate(20);
+    var estimationWithoutBuffer = _HeroDamageEstimator(hero).simulate(20);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("DPS(rough): ${estimator.getDPS()}"),
+        Text(
+            "Damage(in ${estimation.intervalInSeconds}} sec): ${estimation.getDamage()}"),
+        Text("DPS: ${estimation.getDPS()}"),
+        if (buffer != null)
+          Text(
+              "Damage(without buffer): ${estimationWithoutBuffer.getDamage()}"),
+        if (buffer != null)
+          Text("DPS(without buffer): ${estimationWithoutBuffer.getDPS()}"),
+        if (estimation.details != "") Text("Details: ${estimation.details}"),
       ],
     );
+  }
+}
+
+class _DamageEstimation {
+  final String details;
+  final int intervalInSeconds;
+  final List<int> hits;
+
+  const _DamageEstimation(this.hits, this.intervalInSeconds, this.details);
+
+  int getDPS() {
+    return (getDamage() / intervalInSeconds).round();
+  }
+
+  int getDamage() {
+    return hits.reduce((int value, sum) => value + sum);
   }
 }
 
@@ -62,23 +87,9 @@ class _HeroDamageEstimator {
 
   const _HeroDamageEstimator(this.hero, {this.buffer});
 
-  int getDPS() {
-    int timeInterval = 20; // seconds for better precision
-
-    var performedAttacks = simulate(timeInterval);
-
-    print(performedAttacks);
-    // T3 Ian 1172
-    // T3 Ian 1454 (T3 sword)
-    // T4 Ian 2171, 2497, 2823 (T1 sword, T3 staff)
-
-    return (performedAttacks.reduce((int value, sum) => value + sum) /
-            timeInterval)
-        .round();
-  }
-
-  List<int> simulate(int intervalInSeconds) {
+  _DamageEstimation simulate(int intervalInSeconds) {
     var heroStats = buffer != null ? buffer!.buff(hero) : hero.getStats();
+    List<String> details = [];
 
     var damageAmplifier = _SequentialAmplifier();
 
@@ -104,11 +115,16 @@ class _HeroDamageEstimator {
       damageAmplifier.last(
         _XDamageEveryYAttackAmplifier(attackCountPerHit, extraAttackModifier),
       );
+
+      details.add(
+          "+1 attack count with %${extraAttackModifier.asPercentage()} damage");
     }
 
     if (hasExtraDmgEvery5Attack) {
       damageAmplifier
           .last(const _XDamageEveryYAttackAmplifier(5, xAttackDamageModifier));
+      details.add(
+          "Deals %${xAttackDamageModifier.asPercentage()} damage every 5 attacks");
     }
 
     totalAttacksPerformed *= attackCountPerHit;
@@ -122,7 +138,7 @@ class _HeroDamageEstimator {
       );
     }
 
-    return summary;
+    return _DamageEstimation(summary, intervalInSeconds, details.join("\n"));
   }
 }
 
