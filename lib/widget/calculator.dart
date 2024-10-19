@@ -43,27 +43,29 @@ class _CalculatorState extends State<Calculator> {
 //TODO avoid returning widgets from methods
     return Scaffold(
       appBar: AppBar(title: const Text('Stats calculator (alpha version)')),
-      body: Column(
-        children: [
-          const Text("Link hero"),
-          _bufferSelector(),
-          const Text("Main hero"),
-          _heroSelector(),
-          const SizedBox(height: 10),
-          const Text("Relic bonuses"),
-          _relicBonuses(),
-          const SizedBox(height: 10),
-          const Text("Equipment"),
-          ElevatedButton(
-              // This is an interesting way to handle states. Future happens once widget is closed and we return to current page. Hence, setState triggers rendering
-              // otherwise data that was modified on other widget won't be reflected in current one.
-              onPressed: () => openPage(const EquipmentCreator(), context)
-                  .then((val) => setState(() {})),
-              child: const Text("Open equipment generator")),
-          _equipmentSlots(),
-          const Text("Facility bonuses: +40%(max) to all"),
-          statsSummary,
-        ],
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            const Text("Link hero"),
+            _bufferSelector(),
+            const Text("Main hero"),
+            _heroSelector(),
+            const SizedBox(height: 10),
+            const Text("Relic bonuses"),
+            _relicBonuses(),
+            const SizedBox(height: 10),
+            const Text("Equipment"),
+            ElevatedButton(
+                // This is an interesting way to handle states. Future happens once widget is closed and we return to current page. Hence, setState triggers rendering
+                // otherwise data that was modified on other widget won't be reflected in current one.
+                onPressed: () => openPage(const EquipmentCreator(), context)
+                    .then((val) => setState(() {})),
+                child: const Text("Open equipment generator")),
+            _equipmentSlots(),
+            const Text("Facility bonuses: +40%(max) to all"),
+            statsSummary,
+          ],
+        ),
       ),
     );
   }
