@@ -63,6 +63,15 @@ class StatBooster {
         hp: hpBoost);
   }
 
+  StatBooster multiply(int by) {
+    return StatBooster(
+      attack: attack * by,
+      spell: spell * by,
+      aSpeed: aSpeed * by,
+      hp: hp * by,
+    );
+  }
+
   Stats applyTo(Stats stats) {
     var bonusStats = calculateBonus(stats);
 
@@ -83,6 +92,11 @@ class StatBooster {
         attackCount: 0);
   }
 
+  @override
+  String toString() {
+    return "as: $aSpeed, att: $attack, sp: $spell";
+  }
+
   double _attackRatio() {
     return attack / 100;
   }
@@ -101,6 +115,10 @@ class StatBooster {
 }
 
 class Hero {
+  static const String bonusEquipment = "equipment";
+  static const String bonusFacility = "facility";
+  static const String bonusRelic = "relic";
+
   final String name;
   final BaseStats baseStats;
   Map<String, StatBooster> _statsBoosters = {};
@@ -118,11 +136,11 @@ class Hero {
   }
 
   void setRelicBonus(StatBooster bonus) {
-    _statsBoosters["relic"] = bonus;
+    _statsBoosters[bonusRelic] = bonus;
   }
 
   void setFacilityBonus(StatBooster bonus) {
-    _statsBoosters["facility"] = bonus;
+    _statsBoosters[bonusFacility] = bonus;
   }
 
   // TODO we don't merge items here, while we should
@@ -134,17 +152,19 @@ class Hero {
     equipmentList.add(equipment);
 
     var statBonus = equipment.statBonus();
-    if (_statsBoosters.containsKey("equipment")) {
-      _statsBoosters["equipment"] =
-          StatBooster.combine([_statsBoosters["equipment"]!, statBonus]);
+    if (_statsBoosters.containsKey(bonusEquipment)) {
+      _statsBoosters[bonusEquipment] =
+          StatBooster.combine([_statsBoosters[bonusEquipment]!, statBonus]);
     } else {
-      _statsBoosters["equipment"] = statBonus;
+      _statsBoosters[bonusEquipment] = statBonus;
     }
   }
 
   Hero ofTier(HeroTier tier) {
     var hero = Hero._(name, baseStats,
         statsBoosters: Map.of(_statsBoosters), tier: tier);
+
+    hero._statsBoosters.remove(bonusEquipment);
 
     equipmentList.forEach(hero.equip);
 
@@ -251,11 +271,12 @@ class LinkingHero extends Hero {
     }
 
     return Stats(
-        targetStats.hp,
-        (bonusStats.attack / attackDistributionDelta).round() +
-            targetStats.attack,
-        bonusStats.spellPower + targetStats.spellPower,
-        targetStats.attackSpeed,
-        attackCount: targetStats.attackCount);
+      targetStats.hp,
+      (bonusStats.attack / attackDistributionDelta).round() +
+          targetStats.attack,
+      bonusStats.spellPower + targetStats.spellPower,
+      targetStats.attackSpeed,
+      attackCount: targetStats.attackCount,
+    );
   }
 }

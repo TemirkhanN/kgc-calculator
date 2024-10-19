@@ -42,15 +42,16 @@ class DpsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const relicSlotsCount = 3;
     // TODO is it too much logic here?
     Map<_RelicStat, hero_domain.Hero> combinationsWithTopRelicStats = {};
     for (var relicStat in _RelicStat.values) {
       var element = hero.ofTier(hero.tier);
-      element.setRelicBonus(relicStat.toStatBooster());
+      element
+          .setRelicBonus(relicStat.toStatBooster().multiply(relicSlotsCount));
       combinationsWithTopRelicStats[relicStat] = element;
     }
 
-    var estimation = _HeroDamageEstimator(hero, buffer: buffer).simulate(20);
     _DamageEstimation? bestRelicCombination;
     _RelicStat? bestRelicStat;
     for (var topCombination in combinationsWithTopRelicStats.entries) {
@@ -63,6 +64,7 @@ class DpsWidget extends StatelessWidget {
       }
     }
 
+    var estimation = _HeroDamageEstimator(hero, buffer: buffer).simulate(20);
     var estimationWithoutBuffer = _HeroDamageEstimator(hero).simulate(20);
 
     return Column(
@@ -77,9 +79,8 @@ class DpsWidget extends StatelessWidget {
         if (buffer != null)
           Text("DPS(without buffer): ${estimationWithoutBuffer.getDPS()}"),
         if (estimation.details != "") Text("Details: ${estimation.details}"),
-        if (bestRelicStat != null)
-          Text(
-              "Best relic stat: ${bestRelicStat.name} (${bestRelicCombination!.getDPS()} DPS)")
+        Text(
+            "Best relic stat: ${bestRelicStat!.name} (${bestRelicCombination!.getDPS()} DPS)"),
       ],
     );
   }
@@ -169,22 +170,24 @@ class _HeroDamageEstimator {
     }
 
     if (hasExtraAttack) {
+      heroStats = hero_domain.Stats(heroStats.hp, heroStats.attack,
+          heroStats.spellPower, heroStats.attackSpeed,
+          attackCount: heroStats.attackCount + 1);
       damageAmplifier.last(
         _XDamageEveryYAttackAmplifier(
-          heroStats.attackCount + 1,
+          heroStats.attackCount,
           extraAttackModifier,
         ),
       );
 
-      details.add(
-          "+1 attack count with %${extraAttackModifier.asPercentage()} damage");
+      details.add("+1 attack count with x${extraAttackModifier.ratio} damage");
     }
 
     if (hasExtraDmgEvery5Attack) {
       damageAmplifier
           .last(const _XDamageEveryYAttackAmplifier(5, xAttackDamageModifier));
-      details.add(
-          "Deals %${xAttackDamageModifier.asPercentage()} damage every 5 attacks");
+      details
+          .add("Deals x${xAttackDamageModifier.ratio} damage every 5 attacks");
     }
 
     damageAmplifier.first(hero.getDamageAmplifier());
@@ -196,8 +199,11 @@ class _HeroDamageEstimator {
         totalDamage, intervalInSeconds, details.join("\n"));
   }
 
-  List<int> _simulate(int intervalInSeconds, hero_domain.Stats heroStats,
-      _Amplifier damageAmplifier) {
+  List<int> _simulate(
+    int intervalInSeconds,
+    hero_domain.Stats heroStats,
+    _Amplifier damageAmplifier,
+  ) {
     double attacksPerSecond = heroStats.attackSpeed / 100;
     double totalAttacksPerformed = intervalInSeconds * attacksPerSecond;
     totalAttacksPerformed *= heroStats.attackCount;
