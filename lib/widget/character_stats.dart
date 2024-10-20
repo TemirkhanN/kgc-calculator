@@ -216,7 +216,7 @@ class _HeroDamageEstimator {
 extension _HeroSkillAmplifier on hero_domain.Hero {
   _Amplifier getDamageAmplifier() {
     if (CharacterName.sargula.get() == this) {
-      var spellStatBoost = getStats().spellPower / 16.66;
+      var spellStatBoost = getFinalStats().spellPower / 16.66;
       switch (tier.toSkillTier()) {
         case Tier.T1:
           return _XDamageEveryYAttackAmplifier(
@@ -234,14 +234,14 @@ extension _HeroSkillAmplifier on hero_domain.Hero {
     }
 
     if (CharacterName.mel.get() == this) {
-      var spellStatBoost = getStats().spellPower / 50;
+      var spellStatBoost = getFinalStats().spellPower / 50;
       return _XDamageEveryYAttackAmplifier(
           1, RatioModifier((225 + spellStatBoost) / 100));
     }
 
     if (CharacterName.ian.get() == this) {
       var ianAmplifier = _SequentialAmplifier();
-      double spellStatBoost = (getStats().spellPower / 10) / 100;
+      double spellStatBoost = (getFinalStats().spellPower / 10) / 100;
 
       ianAmplifier.first(
           _XDamageEveryYAttackAmplifier(1, RatioModifier(1 + spellStatBoost)));

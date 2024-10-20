@@ -134,7 +134,7 @@ class Hero {
   final BaseStats baseStats;
   Map<String, StatBooster> _statsBoosters = {};
   List<Equipment> equipmentList = [];
-  Stats? _bonusStats;
+  Stats? buffedStats;
 
   Hero(this.name, this.baseStats, {this.tier = HeroTier.T1});
 
@@ -146,8 +146,8 @@ class Hero {
     return baseStats;
   }
 
-  void addBonusStats(Stats bonus) {
-    _bonusStats = bonus;
+  void buffStats(Stats by) {
+    buffedStats = by;
   }
 
   void setRelicBonus(StatBooster bonus) {
@@ -196,13 +196,25 @@ class Hero {
     var bonusStats = StatBooster.combine([..._statsBoosters.values])
         .calculateBonus(tieredStatsExceptAttackSpeed);
 
-    int finalAttackCount = tieredStatsExceptAttackSpeed.attackCount;
-
     int finalAttackSpeed = (tieredStatsExceptAttackSpeed.attackSpeed *
                 tier.getAttackSpeedModifier().ratio)
             .round() +
         bonusStats.attackSpeed;
 
+    return Stats(
+        tieredStatsExceptAttackSpeed.hp + bonusStats.hp,
+        tieredStatsExceptAttackSpeed.attack + bonusStats.attack,
+        tieredStatsExceptAttackSpeed.spellPower + bonusStats.spellPower,
+        finalAttackSpeed,
+        attackCount: tieredStatsExceptAttackSpeed.attackCount);
+  }
+
+  Stats getFinalStats() {
+    var finalStats = getStats();
+    finalStats = buffedStats?.sum(finalStats) ?? finalStats;
+
+    int finalAttackCount = finalStats.attackCount;
+    int finalAttackSpeed = finalStats.attackSpeed;
     // Ian is a channeling hero, hence, his attack speed is always the same
     // attacking once in every 1.5 seconds
     // TODO this has to be a bit different
@@ -230,19 +242,23 @@ class Hero {
       finalAttackSpeed = ((1 / (ianAttackTime + ianChargeTime)) * 100).round();
     }
 
+    if (this == CharacterName.zuoYun.get()) {
+      // enraged bonus (lvl4 passive 30%)
+      int spellAttackSpeedBoost = 30 + 50 + finalStats.spellPower;
+      finalAttackSpeed +=
+          (baseStats.attackSpeed * (spellAttackSpeedBoost / 100)).round();
+      if (finalAttackSpeed > 6000) {
+        finalAttackSpeed = 6000;
+      }
+    }
+
     return Stats(
-        tieredStatsExceptAttackSpeed.hp + bonusStats.hp,
-        tieredStatsExceptAttackSpeed.attack + bonusStats.attack,
-        tieredStatsExceptAttackSpeed.spellPower + bonusStats.spellPower,
-        finalAttackSpeed,
-        attackCount: finalAttackCount);
-  }
-
-  Stats getFinalStats() {
-    var finalStats = getStats();
-    finalStats = _bonusStats?.sum(finalStats) ?? finalStats;
-
-    return finalStats;
+      finalStats.hp,
+      finalStats.attack,
+      finalStats.spellPower,
+      finalAttackSpeed,
+      attackCount: finalAttackCount,
+    );
   }
 
   @override
@@ -286,7 +302,7 @@ class LinkingHero extends Hero {
       attackDistributionDelta = 1;
     }
 
-    target.addBonusStats(Stats(
+    target.buffStats(Stats(
       0,
       (bonusStats.attack / attackDistributionDelta).round(),
       bonusStats.spellPower,

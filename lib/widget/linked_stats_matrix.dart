@@ -46,7 +46,8 @@ class StatsSummary {
   const StatsSummary(this.summary, this.stats);
 
   StatsSummary.forChar(hero_domain.Hero character)
-      : this("${character.tier.name} ${character.name}", character.getStats());
+      : this("${character.tier.name} ${character.name}",
+            character.getFinalStats());
 }
 
 class StatsMatrix {
