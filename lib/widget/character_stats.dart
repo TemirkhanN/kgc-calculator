@@ -36,9 +36,8 @@ class StatsWidget extends StatelessWidget {
 
 class DpsWidget extends StatelessWidget {
   final hero_domain.Hero hero;
-  final hero_domain.LinkingHero? buffer;
 
-  const DpsWidget(this.hero, {super.key, this.buffer});
+  const DpsWidget(this.hero, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -55,8 +54,7 @@ class DpsWidget extends StatelessWidget {
     _DamageEstimation? bestRelicCombination;
     _RelicStat? bestRelicStat;
     for (var topCombination in combinationsWithTopRelicStats.entries) {
-      var potential = _HeroDamageEstimator(topCombination.value, buffer: buffer)
-          .simulate(20);
+      var potential = _HeroDamageEstimator(topCombination.value).simulate(20);
       if (bestRelicCombination == null ||
           potential.getDPS() > bestRelicCombination.getDPS()) {
         bestRelicCombination = potential;
@@ -64,8 +62,7 @@ class DpsWidget extends StatelessWidget {
       }
     }
 
-    var estimation = _HeroDamageEstimator(hero, buffer: buffer).simulate(20);
-    var estimationWithoutBuffer = _HeroDamageEstimator(hero).simulate(20);
+    var estimation = _HeroDamageEstimator(hero).simulate(20);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -73,11 +70,6 @@ class DpsWidget extends StatelessWidget {
         Text(
             "Damage(in ${estimation.intervalInSeconds}} sec): ${estimation.getDamage()}"),
         Text("DPS: ${estimation.getDPS()}"),
-        if (buffer != null)
-          Text(
-              "Damage(without buffer): ${estimationWithoutBuffer.getDamage()}"),
-        if (buffer != null)
-          Text("DPS(without buffer): ${estimationWithoutBuffer.getDPS()}"),
         if (estimation.details != "") Text("Details: ${estimation.details}"),
         Text(
             "Best relic stat: ${bestRelicStat!.name} (${bestRelicCombination!.getDPS()} DPS)"),
@@ -145,12 +137,12 @@ class _HeroDamageEstimator {
   static const RatioModifier xAttackDamageModifier = RatioModifier(2);
 
   final hero_domain.Hero hero;
-  final hero_domain.LinkingHero? buffer;
 
-  const _HeroDamageEstimator(this.hero, {this.buffer});
+  const _HeroDamageEstimator(this.hero);
 
   _DamageEstimation simulate(int intervalInSeconds) {
-    var heroStats = buffer != null ? buffer!.buff(hero) : hero.getStats();
+    var heroStats = hero.getFinalStats();
+
     List<String> details = [];
 
     var damageAmplifier = _SequentialAmplifier();

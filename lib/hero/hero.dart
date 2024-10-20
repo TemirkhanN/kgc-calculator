@@ -17,6 +17,16 @@ class BaseStats {
 class Stats extends BaseStats {
   const Stats(super.hp, super.attack, super.spellPower, super.attackSpeed,
       {super.attackCount});
+
+  Stats sum(Stats withStats) {
+    return Stats(
+      hp + withStats.hp,
+      attack + withStats.attack,
+      spellPower + withStats.spellPower,
+      attackSpeed + withStats.attackSpeed,
+      attackCount: attackCount + withStats.attackCount,
+    );
+  }
 }
 
 class StatBooster {
@@ -120,10 +130,11 @@ class Hero {
   static const String bonusRelic = "relic";
 
   final String name;
+  final HeroTier tier;
   final BaseStats baseStats;
   Map<String, StatBooster> _statsBoosters = {};
   List<Equipment> equipmentList = [];
-  final HeroTier tier;
+  Stats? _bonusStats;
 
   Hero(this.name, this.baseStats, {this.tier = HeroTier.T1});
 
@@ -133,6 +144,10 @@ class Hero {
 
   BaseStats getBaseStats() {
     return baseStats;
+  }
+
+  void addBonusStats(Stats bonus) {
+    _bonusStats = bonus;
   }
 
   void setRelicBonus(StatBooster bonus) {
@@ -223,8 +238,11 @@ class Hero {
         attackCount: finalAttackCount);
   }
 
-  int getRealAttackSpeed() {
-    return getStats().attackSpeed;
+  Stats getFinalStats() {
+    var finalStats = getStats();
+    finalStats = _bonusStats?.sum(finalStats) ?? finalStats;
+
+    return finalStats;
   }
 
   @override
@@ -248,11 +266,9 @@ class LinkingHero extends Hero {
     return hero;
   }
 
-  Stats buff(Hero target) {
+  void buff(Hero target) {
     LinkEffect buff =
         _linkBuff.firstWhere((boost) => boost.skillTier == tier.toSkillTier());
-
-    var targetStats = target.getStats();
 
     var myRawStats = tier.applyToStats(target.baseStats);
     // Beware, if at some point some hero starts buffing attack speed, this needs to be adjusted
@@ -270,13 +286,12 @@ class LinkingHero extends Hero {
       attackDistributionDelta = 1;
     }
 
-    return Stats(
-      targetStats.hp,
-      (bonusStats.attack / attackDistributionDelta).round() +
-          targetStats.attack,
-      bonusStats.spellPower + targetStats.spellPower,
-      targetStats.attackSpeed,
-      attackCount: targetStats.attackCount,
-    );
+    target.addBonusStats(Stats(
+      0,
+      (bonusStats.attack / attackDistributionDelta).round(),
+      bonusStats.spellPower,
+      0,
+      attackCount: 0,
+    ));
   }
 }

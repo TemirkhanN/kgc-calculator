@@ -10,20 +10,28 @@ class LinkedStatsMatrix extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var chars = characters.entries.where((elem) => elem.value is! hero_domain.LinkingHero).toList();
-    hero_domain.LinkingHero supportCharacter = characters[CharacterName.lunaire] as hero_domain.LinkingHero;
+    var chars = characters.entries
+        .where((elem) => elem.value is! hero_domain.LinkingHero)
+        .toList();
+    hero_domain.LinkingHero supportCharacter =
+        characters[CharacterName.lunaire] as hero_domain.LinkingHero;
 
     return MaterialApp(
       title: 'KGC Calculator',
       home: Scaffold(
         body: GridView.builder(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4 // Spacing between rows
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 4 // Spacing between rows
               ),
           itemCount: chars.length,
           itemBuilder: (BuildContext context, int index) {
             var character = chars[index].value;
 
-            return ElevatedButton(onPressed: () => openPage(LinkStatBuffCalculator(character, supportCharacter), context), child: Text(character.name));
+            return ElevatedButton(
+                onPressed: () => openPage(
+                    LinkStatBuffCalculator(character, supportCharacter),
+                    context),
+                child: Text(character.name));
           },
         ),
       ),
@@ -37,7 +45,8 @@ class StatsSummary {
 
   const StatsSummary(this.summary, this.stats);
 
-  StatsSummary.forChar(hero_domain.Hero character) : this("${character.tier.name} ${character.name}", character.getStats());
+  StatsSummary.forChar(hero_domain.Hero character)
+      : this("${character.tier.name} ${character.name}", character.getStats());
 }
 
 class StatsMatrix {
@@ -69,9 +78,10 @@ class StatsMatrix {
       for (HeroTier tierChar2 in allTiers) {
         main.ofTier(tierChar1);
         support.ofTier(tierChar2);
+        support.buff(main);
 
-        var buffedStats = support.buff(main);
-        summary[row.current()][column.current()] = StatsSummary("", buffedStats);
+        summary[row.current()][column.current()] =
+            StatsSummary("", main.getFinalStats());
         column.next();
       }
       row.next();
