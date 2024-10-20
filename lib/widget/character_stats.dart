@@ -196,7 +196,13 @@ class _HeroDamageEstimator {
     hero_domain.Stats heroStats,
     _Amplifier damageAmplifier,
   ) {
+    // Attack speed is capped by sync, which is the refresh rate
+    const maxRefreshRate = 60;
+
     double attacksPerSecond = heroStats.attackSpeed / 100;
+    if (attacksPerSecond > maxRefreshRate) {
+      attacksPerSecond = maxRefreshRate as double;
+    }
     double totalAttacksPerformed = intervalInSeconds * attacksPerSecond;
     totalAttacksPerformed *= heroStats.attackCount;
 

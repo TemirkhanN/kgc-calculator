@@ -247,9 +247,6 @@ class Hero {
       int spellAttackSpeedBoost = 30 + 50 + finalStats.spellPower;
       finalAttackSpeed +=
           (baseStats.attackSpeed * (spellAttackSpeedBoost / 100)).round();
-      if (finalAttackSpeed > 6000) {
-        finalAttackSpeed = 6000;
-      }
     }
 
     return Stats(
