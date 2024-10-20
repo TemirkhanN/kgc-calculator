@@ -1,4 +1,3 @@
-import 'package:god_king_castle_calculator/data.dart';
 import 'package:god_king_castle_calculator/hero/equipment.dart';
 import 'package:god_king_castle_calculator/hero/skill.dart';
 import 'package:god_king_castle_calculator/hero/tier.dart';
@@ -138,10 +137,6 @@ class Hero {
 
   Hero(this.name, this.baseStats, {this.tier = HeroTier.T1});
 
-  Hero._(this.name, this.baseStats,
-      {Map<String, StatBooster>? statsBoosters, this.tier = HeroTier.T1})
-      : _statsBoosters = statsBoosters ?? {};
-
   BaseStats getBaseStats() {
     return baseStats;
   }
@@ -176,12 +171,9 @@ class Hero {
   }
 
   Hero ofTier(HeroTier tier) {
-    var hero = Hero._(name, baseStats,
-        statsBoosters: Map.of(_statsBoosters), tier: tier);
-
-    hero._statsBoosters.remove(bonusEquipment);
-
-    equipmentList.forEach(hero.equip);
+    var hero = Hero(name, baseStats, tier: tier);
+    hero._statsBoosters = Map.of(_statsBoosters);
+    hero.equipmentList = List.of(equipmentList);
 
     return hero;
   }
@@ -211,51 +203,8 @@ class Hero {
 
   Stats getFinalStats() {
     var finalStats = getStats();
-    finalStats = buffedStats?.sum(finalStats) ?? finalStats;
 
-    int finalAttackCount = finalStats.attackCount;
-    int finalAttackSpeed = finalStats.attackSpeed;
-    // Ian is a channeling hero, hence, his attack speed is always the same
-    // attacking once in every 1.5 seconds
-    // TODO this has to be a bit different
-    if (this == CharacterName.ian.get()) {
-      var ianChargeTime = 1.5;
-      const ianAttackTime = 1;
-      switch (tier.toSkillTier()) {
-        case Tier.T1:
-          ianChargeTime -= 0.1;
-          finalAttackCount += 2;
-        case Tier.T2:
-          ianChargeTime -= 0.2;
-          finalAttackCount += 3;
-        case Tier.T3:
-          ianChargeTime -= 0.3;
-          finalAttackCount += 4;
-        case Tier.T4:
-          ianChargeTime -= 0.5;
-          finalAttackCount += 5;
-      }
-
-      // Ian performs his slashes for 1 second after charge. Regardless of amount of slashes
-      // I.e. Tier7 Ian performs 5 slashes for 1second after 1 charging for second. Which summarizes
-      // as 2 seconds.
-      finalAttackSpeed = ((1 / (ianAttackTime + ianChargeTime)) * 100).round();
-    }
-
-    if (this == CharacterName.zuoYun.get()) {
-      // enraged bonus (lvl4 passive 30%)
-      int spellAttackSpeedBoost = 30 + 50 + finalStats.spellPower;
-      finalAttackSpeed +=
-          (baseStats.attackSpeed * (spellAttackSpeedBoost / 100)).round();
-    }
-
-    return Stats(
-      finalStats.hp,
-      finalStats.attack,
-      finalStats.spellPower,
-      finalAttackSpeed,
-      attackCount: finalAttackCount,
-    );
+    return buffedStats?.sum(finalStats) ?? finalStats;
   }
 
   @override
@@ -275,6 +224,7 @@ class LinkingHero extends Hero {
   LinkingHero ofTier(HeroTier tier) {
     var hero = LinkingHero(name, baseStats, _linkBuff, tier: tier);
     hero._statsBoosters = Map.of(_statsBoosters);
+    hero.equipmentList = List.of(equipmentList);
 
     return hero;
   }
@@ -306,5 +256,88 @@ class LinkingHero extends Hero {
       0,
       attackCount: 0,
     ));
+  }
+}
+
+class Ian extends Hero {
+  Ian(BaseStats baseStats, {HeroTier tier = HeroTier.T1})
+      : super("Ian", baseStats, tier: tier);
+
+  @override
+  Ian ofTier(HeroTier tier) {
+    var hero = Ian(baseStats, tier: tier);
+    hero._statsBoosters = Map.of(_statsBoosters);
+    hero.equipmentList = List.of(equipmentList);
+
+    return hero;
+  }
+
+  @override
+  Stats getFinalStats() {
+    var finalStats = super.getFinalStats();
+    var finalAttackCount = finalStats.attackCount;
+
+    // Ian is a channeling hero, hence, his attack speed is always the same
+    // attacking once in every 1.5 seconds
+    var ianChargeTime = 1.5;
+    const ianAttackTime = 1;
+    switch (tier.toSkillTier()) {
+      case Tier.T1:
+        ianChargeTime -= 0.1;
+        finalAttackCount += 2;
+      case Tier.T2:
+        ianChargeTime -= 0.2;
+        finalAttackCount += 3;
+      case Tier.T3:
+        ianChargeTime -= 0.3;
+        finalAttackCount += 4;
+      case Tier.T4:
+        ianChargeTime -= 0.5;
+        finalAttackCount += 5;
+    }
+
+    // Ian performs his slashes for 1 second after charge. Regardless of amount of slashes
+    // I.e. Tier7 Ian performs 5 slashes for 1second after charging for a second.
+    // Which in total gives us 2 seconds.
+    var approximateAttackSpeed =
+        ((1 / (ianAttackTime + ianChargeTime)) * 100).round();
+
+    return Stats(
+      finalStats.hp,
+      finalStats.attack,
+      finalStats.spellPower,
+      approximateAttackSpeed,
+      attackCount: finalAttackCount,
+    );
+  }
+}
+
+// TODO this stuff reeks of composition over inheritance...
+class ZuoYun extends Hero {
+  ZuoYun(BaseStats baseStats, {HeroTier tier = HeroTier.T1})
+      : super("Zuo Yun", baseStats, tier: tier);
+
+  @override
+  ZuoYun ofTier(HeroTier tier) {
+    var hero = ZuoYun(baseStats, tier: tier);
+    hero._statsBoosters = Map.of(_statsBoosters);
+    hero.equipmentList = List.of(equipmentList);
+
+    return hero;
+  }
+
+  @override
+  Stats getFinalStats() {
+    var finalStats = super.getFinalStats();
+
+    // enraged bonus (lvl4 passive 30%)
+    const skillConstantBonus = 50;
+    const lvl4Bonus = 30;
+    int boost = lvl4Bonus + skillConstantBonus + finalStats.spellPower;
+    var skillAttackSpeedBonus = baseStats.attackSpeed * boost / 100;
+
+    var skillBonusStats = Stats(0, 0, 0, skillAttackSpeedBonus.round());
+
+    return finalStats.sum(skillBonusStats);
   }
 }

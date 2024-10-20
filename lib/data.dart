@@ -26,8 +26,7 @@ Map<CharacterName, Hero> characters = {
   CharacterName.lyca: Hero("Lyca", const BaseStats(826, 118, 177, 125)),
   CharacterName.hansi: Hero("Hansi", const BaseStats(750, 71, 0, 125)),
   CharacterName.sargula: Hero("Sargula", const BaseStats(1593, 207, 118, 100)),
-  CharacterName.zuoYun: Hero("Zuo Yun", const BaseStats(1062, 118, 59, 125)),
+  CharacterName.zuoYun: ZuoYun(const BaseStats(1062, 118, 59, 125)),
   CharacterName.mel: Hero("Mel", const BaseStats(1298, 177, 295, 83)),
-  CharacterName.ian:
-      Hero("Ian", const BaseStats(1180, 177, 47, 100, attackCount: 0)),
+  CharacterName.ian: Ian(const BaseStats(1180, 177, 47, 100, attackCount: 0)),
 };
