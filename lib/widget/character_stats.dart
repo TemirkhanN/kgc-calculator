@@ -36,8 +36,11 @@ class StatsWidget extends StatelessWidget {
 
 class DpsWidget extends StatelessWidget {
   final hero_domain.Hero hero;
+  final double critRate;
+  final double critPower;
 
-  const DpsWidget(this.hero, {super.key});
+  const DpsWidget(this.hero,
+      {super.key, this.critRate = 0, this.critPower = 25});
 
   @override
   Widget build(BuildContext context) {
@@ -64,17 +67,35 @@ class DpsWidget extends StatelessWidget {
 
     var estimation = _HeroDamageEstimator(hero).simulate(20);
 
+    var totalDamage =
+        _averageDamage(estimation.getDamage(), critRate, critPower);
+    var dps = _averageDamage(estimation.getDPS(), critRate, critPower);
+    var bestStatDps =
+        _averageDamage(bestRelicCombination!.getDPS(), critRate, critPower);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-            "Damage(in ${estimation.intervalInSeconds}} sec): ${estimation.getDamage()}"),
-        Text("DPS: ${estimation.getDPS()}"),
+        Text("Damage(in ${estimation.intervalInSeconds} sec): $totalDamage"),
+        Text("DPS: $dps"),
         if (estimation.details != "") Text("Details: ${estimation.details}"),
-        Text(
-            "Best relic stat: ${bestRelicStat!.name} (${bestRelicCombination!.getDPS()} DPS)"),
+        Text("Best relic stat: ${bestRelicStat!.name} ($bestStatDps DPS)"),
       ],
     );
+  }
+
+  num _averageDamage(num normalDamage, double critRate, double critPower) {
+    if (critRate <= 0) {
+      return normalDamage;
+    }
+
+    var normalHits = (100 - critRate) / 100;
+    var criticalHits = critRate / 100;
+    var critMultiplier = 1 + (critPower / 100);
+
+    return ((normalDamage * normalHits) +
+            (normalDamage * criticalHits * critMultiplier))
+        .roundToDouble();
   }
 }
 

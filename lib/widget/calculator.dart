@@ -31,6 +31,11 @@ class _CalculatorState extends State<Calculator> {
   hero_domain.Hero? _hero;
   Map<int, Equipment?> equipmentSlots = {1: null, 2: null, 3: null};
 
+  final TextEditingController _critRateController =
+      TextEditingController(text: '0');
+  final TextEditingController _critPowerController =
+      TextEditingController(text: '25');
+
   hero_domain.LinkingHero? _buffer;
   HeroTier _bufferTier = HeroTier.T1;
 
@@ -53,6 +58,7 @@ class _CalculatorState extends State<Calculator> {
             const SizedBox(height: 10),
             const Text("Relic bonuses"),
             _relicBonuses(),
+            _critBonuses(),
             const SizedBox(height: 10),
             const Text("Equipment"),
             ElevatedButton(
@@ -99,11 +105,14 @@ class _CalculatorState extends State<Calculator> {
       }
     }
 
-    var buffer = _buffer?.ofTier(_bufferTier).buff(adjustedHero);
+    _buffer?.ofTier(_bufferTier).buff(adjustedHero);
+
+    var critRate = double.tryParse(_critRateController.text) ?? 0;
+    var critPower = double.tryParse(_critPowerController.text) ?? 0;
 
     statsSummary = Column(children: [
       StatsWidget("Expected stats", adjustedHero.getFinalStats()),
-      DpsWidget(adjustedHero),
+      DpsWidget(adjustedHero, critRate: critRate, critPower: critPower),
     ]);
   }
 
@@ -135,6 +144,50 @@ class _CalculatorState extends State<Calculator> {
           ),
         ]);
       }).toList(growable: false),
+    );
+  }
+
+  Widget _critBonuses() {
+    return Padding(
+      padding: const EdgeInsets.all(10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 80,
+            child: TextField(
+              maxLength: 3,
+              controller: _critRateController,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                label: Text("%", style: TextStyle(color: Colors.purple)),
+              ),
+              onChanged: (String? newValue) {
+                setState(() {
+                  _recalculateStats();
+                });
+              },
+            ),
+          ),
+          const SizedBox(width: 10),
+          SizedBox(
+            width: 80,
+            child: TextField(
+              maxLength: 4,
+              controller: _critPowerController,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                label: Text("🗡", style: TextStyle(color: Colors.purple)),
+              ),
+              onChanged: (String? newValue) {
+                setState(() {
+                  _recalculateStats();
+                });
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 
