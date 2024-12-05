@@ -2,7 +2,17 @@ import 'package:god_king_castle_calculator/hero/hero.dart';
 import 'package:god_king_castle_calculator/hero/skill.dart';
 import 'package:god_king_castle_calculator/hero/tier.dart';
 
-enum CharacterName { lunaire, saras, lyca, hansi, sargula, zuoYun, mel, ian }
+enum CharacterName {
+  lunaire,
+  saras,
+  lyca,
+  hansi,
+  sargula,
+  zuoYun,
+  mel,
+  ian,
+  leonhardt
+}
 
 extension CharacterDiscovery on CharacterName {
   Hero get() {
@@ -29,4 +39,5 @@ Map<CharacterName, Hero> characters = {
   CharacterName.zuoYun: ZuoYun(const BaseStats(1062, 118, 59, 125)),
   CharacterName.mel: Hero("Mel", const BaseStats(1298, 177, 295, 83)),
   CharacterName.ian: Ian(const BaseStats(1180, 177, 47, 100, attackCount: 0)),
+  CharacterName.leonhardt: Hero("Leonhardt", const BaseStats(1770, 89, 89, 91)),
 };

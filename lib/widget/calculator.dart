@@ -37,6 +37,10 @@ class _CalculatorState extends State<Calculator> {
       TextEditingController(text: '25');
 
   hero_domain.LinkingHero? _buffer;
+  bool _withSacramendum = false;
+  final TextEditingController _bufferGuardController =
+      TextEditingController(text: '0');
+
   HeroTier _bufferTier = HeroTier.T1;
 
   Widget statsSummary = StatsWidget.empty;
@@ -51,6 +55,7 @@ class _CalculatorState extends State<Calculator> {
       body: SingleChildScrollView(
         child: Column(
           children: [
+            const Text("Facility bonuses: +40%(max) to all"),
             const Text("Link hero"),
             _bufferSelector(),
             const Text("Main hero"),
@@ -68,7 +73,6 @@ class _CalculatorState extends State<Calculator> {
                     .then((val) => setState(() {})),
                 child: const Text("Open equipment generator")),
             _equipmentSlots(),
-            const Text("Facility bonuses: +40%(max) to all"),
             statsSummary,
           ],
         ),
@@ -105,7 +109,11 @@ class _CalculatorState extends State<Calculator> {
       }
     }
 
-    _buffer?.ofTier(_bufferTier).buff(adjustedHero);
+    if (_buffer != null) {
+      var newbuffer = _buffer!.ofTier(_bufferTier);
+      newbuffer.setFacilityBonus(facilityBooster);
+      newbuffer.buff(adjustedHero);
+    }
 
     var critRate = double.tryParse(_critRateController.text) ?? 0;
     var critPower = double.tryParse(_critPowerController.text) ?? 0;
@@ -161,6 +169,7 @@ class _CalculatorState extends State<Calculator> {
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 label: Text("%", style: TextStyle(color: Colors.purple)),
+                counterText: '',
               ),
               onChanged: (String? newValue) {
                 setState(() {
@@ -178,6 +187,7 @@ class _CalculatorState extends State<Calculator> {
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 label: Text("🗡", style: TextStyle(color: Colors.purple)),
+                counterText: '',
               ),
               onChanged: (String? newValue) {
                 setState(() {
@@ -205,6 +215,7 @@ class _CalculatorState extends State<Calculator> {
               decoration: const InputDecoration(
                 labelText: "🗡",
                 border: OutlineInputBorder(),
+                counterText: '',
               ),
               onChanged: (String? newValue) {
                 setState(() {
@@ -222,6 +233,7 @@ class _CalculatorState extends State<Calculator> {
               decoration: const InputDecoration(
                 labelText: "🪄",
                 border: OutlineInputBorder(),
+                counterText: '',
               ),
               onChanged: (String? newValue) {
                 setState(() {
@@ -239,6 +251,7 @@ class _CalculatorState extends State<Calculator> {
               decoration: const InputDecoration(
                 labelText: "🏹",
                 border: OutlineInputBorder(),
+                counterText: '',
               ),
               onChanged: (String? newValue) {
                 setState(() {
@@ -287,9 +300,8 @@ class _CalculatorState extends State<Calculator> {
   }
 
   Widget _bufferSelector() {
-    return Padding(
-      padding: const EdgeInsets.all(10),
-      child: Row(
+    return Column(children: [
+      Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           KgcFormFactory.createHeroTierSelector(
@@ -315,15 +327,51 @@ class _CalculatorState extends State<Calculator> {
             value: _buffer,
             onChanged: (hero_domain.Hero? selected) {
               setState(() {
-                _buffer = selected != null
-                    ? selected as hero_domain.LinkingHero
-                    : null;
+                if (selected != null) {
+                  _buffer = selected as hero_domain.LinkingHero;
+                } else {
+                  _buffer = null;
+                }
                 _recalculateStats();
               });
             },
           ),
         ],
       ),
-    );
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text("Sacramendum"),
+          Checkbox(
+              value: _withSacramendum,
+              onChanged: (bool? state) {
+                setState(() {
+                  _withSacramendum = state ?? false;
+                  _recalculateStats();
+                });
+              }),
+          Visibility(
+            visible: _withSacramendum,
+            child: SizedBox(
+              width: 55,
+              child: TextField(
+                maxLength: 3,
+                controller: _bufferGuardController,
+                decoration: const InputDecoration(
+                  label: Icon(Icons.shield),
+                  border: OutlineInputBorder(),
+                  counterText: '',
+                ),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _recalculateStats();
+                  });
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    ]);
   }
 }
