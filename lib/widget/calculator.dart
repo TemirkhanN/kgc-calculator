@@ -54,12 +54,17 @@ class _CalculatorState extends State<Calculator> {
           children: [
             const Text("Facility bonuses: +40%(max) to all"),
             const Text("Link hero"),
-            LinkHeroPresetWidget((LinkHeroPreset v) {
-              setState(() {
-                _buffer = v;
-                _recalculateStats();
-              });
-            }),
+            ColoredBox(
+              color: Colors.red,
+              child: LinkHeroPresetWidget(
+                (LinkHeroPreset v) {
+                  setState(() {
+                    _buffer = v;
+                    _recalculateStats();
+                  });
+                },
+              ),
+            ),
             const Text("Main hero"),
             _heroSelector(),
             const SizedBox(height: 10),

@@ -33,15 +33,21 @@ class LinkHeroPreset extends ChangeNotifier {
   }
 }
 
-class LinkHeroPresetWidget extends StatelessWidget {
+class LinkHeroPresetWidget extends StatefulWidget {
+  final void Function(LinkHeroPreset val) _onChange;
+
+
+  LinkHeroPresetWidget(this._onChange, {super.key});
+
+  @override
+  State<LinkHeroPresetWidget> createState() => _LinkHeroPresetWidgetState();
+}
+
+class _LinkHeroPresetWidgetState extends State<LinkHeroPresetWidget> {
   final TextEditingController _bufferGuardController =
       TextEditingController(text: '0');
 
-  final void Function(LinkHeroPreset val) _onChange;
-
   LinkHeroPreset preset = LinkHeroPreset();
-
-  LinkHeroPresetWidget(this._onChange, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +59,8 @@ class LinkHeroPresetWidget extends StatelessWidget {
               value: preset.tier,
               onchange: (newTier) {
                 preset.tier = newTier;
-                _onChange(preset);
+                print('Preset hash ${preset.hashCode}');
+                widget._onChange(preset);
               }),
           const SizedBox(width: 10),
           DropdownButton(
@@ -75,7 +82,7 @@ class LinkHeroPresetWidget extends StatelessWidget {
                 preset.hero = null;
               }
 
-              _onChange(preset);
+              widget._onChange(preset);
             },
           ),
         ],
@@ -89,7 +96,7 @@ class LinkHeroPresetWidget extends StatelessWidget {
               onChanged: (bool? state) {
                 preset.withSacramendum = state ?? false;
 
-                _onChange(preset);
+                widget._onChange(preset);
               }),
           Visibility(
             visible: preset.withSacramendum,
@@ -105,7 +112,7 @@ class LinkHeroPresetWidget extends StatelessWidget {
                 ),
                 onChanged: (String? newValue) {
                   // TODO guard level
-                  _onChange(preset);
+                  widget._onChange(preset);
                 },
               ),
             ),
