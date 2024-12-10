@@ -5,6 +5,7 @@ import 'package:god_king_castle_calculator/hero/equipment.dart';
 import 'package:god_king_castle_calculator/hero/hero.dart' as hero_domain;
 import 'package:god_king_castle_calculator/hero/tier.dart';
 import 'package:god_king_castle_calculator/main.dart';
+import 'package:god_king_castle_calculator/widget/calculator/link_hero.dart';
 import 'package:god_king_castle_calculator/widget/character_stats.dart';
 import 'package:god_king_castle_calculator/widget/creator/equipment_creator.dart';
 import 'package:god_king_castle_calculator/widget/kgc_form.dart';
@@ -27,6 +28,7 @@ class _CalculatorState extends State<Calculator> {
       TextEditingController(text: '0');
   final TextEditingController _relicSpellPowerController =
       TextEditingController(text: '0');
+
   HeroTier _heroTier = HeroTier.T1;
   hero_domain.Hero? _hero;
   Map<int, Equipment?> equipmentSlots = {1: null, 2: null, 3: null};
@@ -36,16 +38,11 @@ class _CalculatorState extends State<Calculator> {
   final TextEditingController _critPowerController =
       TextEditingController(text: '25');
 
-  hero_domain.LinkingHero? _buffer;
-  bool _withSacramendum = false;
-  final TextEditingController _bufferGuardController =
-      TextEditingController(text: '0');
-
-  HeroTier _bufferTier = HeroTier.T1;
-
   Widget statsSummary = StatsWidget.empty;
 
   final EquipmentRepository _equipmentRepository = EquipmentRepository();
+
+  LinkHeroPreset _buffer = LinkHeroPreset();
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +54,12 @@ class _CalculatorState extends State<Calculator> {
           children: [
             const Text("Facility bonuses: +40%(max) to all"),
             const Text("Link hero"),
-            _bufferSelector(),
+            LinkHeroPresetWidget((LinkHeroPreset v) {
+              setState(() {
+                _buffer = v;
+                _recalculateStats();
+              });
+            }),
             const Text("Main hero"),
             _heroSelector(),
             const SizedBox(height: 10),
@@ -109,8 +111,8 @@ class _CalculatorState extends State<Calculator> {
       }
     }
 
-    if (_buffer != null) {
-      var newbuffer = _buffer!.ofTier(_bufferTier);
+    if (_buffer.hero != null) {
+      var newbuffer = _buffer.hero!.ofTier(_buffer.tier);
       newbuffer.setFacilityBonus(facilityBooster);
       newbuffer.buff(adjustedHero);
     }
@@ -297,81 +299,5 @@ class _CalculatorState extends State<Calculator> {
         ],
       ),
     );
-  }
-
-  Widget _bufferSelector() {
-    return Column(children: [
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          KgcFormFactory.createHeroTierSelector(
-              value: _bufferTier,
-              onchange: (newTier) {
-                setState(() {
-                  _bufferTier = newTier;
-                  _recalculateStats();
-                });
-              }),
-          const SizedBox(width: 10),
-          DropdownButton(
-            items: characters.entries
-                .where((c) => c.value is hero_domain.LinkingHero)
-                .map(
-                  (entry) => DropdownMenuItem(
-                    value: entry.value,
-                    child: Text(entry.value.name),
-                  ),
-                )
-                .toList()
-              ..add(const DropdownMenuItem(child: Text("none"))),
-            value: _buffer,
-            onChanged: (hero_domain.Hero? selected) {
-              setState(() {
-                if (selected != null) {
-                  _buffer = selected as hero_domain.LinkingHero;
-                } else {
-                  _buffer = null;
-                }
-                _recalculateStats();
-              });
-            },
-          ),
-        ],
-      ),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text("Sacramendum"),
-          Checkbox(
-              value: _withSacramendum,
-              onChanged: (bool? state) {
-                setState(() {
-                  _withSacramendum = state ?? false;
-                  _recalculateStats();
-                });
-              }),
-          Visibility(
-            visible: _withSacramendum,
-            child: SizedBox(
-              width: 55,
-              child: TextField(
-                maxLength: 3,
-                controller: _bufferGuardController,
-                decoration: const InputDecoration(
-                  label: Icon(Icons.shield),
-                  border: OutlineInputBorder(),
-                  counterText: '',
-                ),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    _recalculateStats();
-                  });
-                },
-              ),
-            ),
-          ),
-        ],
-      ),
-    ]);
   }
 }
