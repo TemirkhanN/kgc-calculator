@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:god_king_castle_calculator/data.dart';
 import 'package:god_king_castle_calculator/data/equipment_repository.dart';
 import 'package:god_king_castle_calculator/hero/equipment.dart';
 import 'package:god_king_castle_calculator/hero/hero.dart' as hero_domain;
-import 'package:god_king_castle_calculator/hero/tier.dart';
 import 'package:god_king_castle_calculator/main.dart';
 import 'package:god_king_castle_calculator/widget/calculator/link_hero.dart';
+import 'package:god_king_castle_calculator/widget/calculator/main_hero.dart';
 import 'package:god_king_castle_calculator/widget/character_stats.dart';
 import 'package:god_king_castle_calculator/widget/creator/equipment_creator.dart';
-import 'package:god_king_castle_calculator/widget/kgc_form.dart';
 
 class Calculator extends StatefulWidget {
   const Calculator({super.key});
@@ -29,8 +27,6 @@ class _CalculatorState extends State<Calculator> {
   final TextEditingController _relicSpellPowerController =
       TextEditingController(text: '0');
 
-  HeroTier _heroTier = HeroTier.T1;
-  hero_domain.Hero? _hero;
   Map<int, Equipment?> equipmentSlots = {1: null, 2: null, 3: null};
 
   final TextEditingController _critRateController =
@@ -43,6 +39,7 @@ class _CalculatorState extends State<Calculator> {
   final EquipmentRepository _equipmentRepository = EquipmentRepository();
 
   LinkHeroPreset _buffer = LinkHeroPreset();
+  MainHeroPreset _mainHero = MainHeroPreset();
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +60,14 @@ class _CalculatorState extends State<Calculator> {
               },
             ),
             const Text("Main hero"),
-            _heroSelector(),
+            MainHeroPresetWidget(
+              (MainHeroPreset preset) {
+                setState(() {
+                  _mainHero = preset;
+                  _recalculateStats();
+                });
+              },
+            ),
             const SizedBox(height: 10),
             const Text("Relic bonuses"),
             _relicBonuses(),
@@ -85,8 +89,7 @@ class _CalculatorState extends State<Calculator> {
   }
 
   void _recalculateStats() {
-    var adjustedHero = _hero?.ofTier(_heroTier);
-
+    var adjustedHero = _mainHero.hero?.ofTier(_mainHero.tier);
     if (adjustedHero == null) {
       statsSummary = StatsWidget.empty;
       return;
@@ -263,40 +266,6 @@ class _CalculatorState extends State<Calculator> {
                 });
               },
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _heroSelector() {
-    return Padding(
-      padding: const EdgeInsets.all(10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          KgcFormFactory.createHeroTierSelector(
-              value: _heroTier,
-              onchange: (newTier) {
-                setState(() {
-                  _heroTier = newTier;
-                  _recalculateStats();
-                });
-              }),
-          const SizedBox(width: 10),
-          DropdownButton(
-            items: characters.entries
-                .where((c) => c.value is! hero_domain.LinkingHero)
-                .map((entry) => DropdownMenuItem(
-                    value: entry.value, child: Text(entry.value.name)))
-                .toList(growable: false),
-            value: _hero,
-            onChanged: (hero_domain.Hero? selected) {
-              setState(() {
-                _hero = selected;
-                _recalculateStats();
-              });
-            },
           ),
         ],
       ),

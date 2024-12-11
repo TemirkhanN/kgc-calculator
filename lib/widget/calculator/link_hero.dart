@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:god_king_castle_calculator/data.dart';
-import 'package:god_king_castle_calculator/hero/hero.dart' as hero_domain;
+import 'package:god_king_castle_calculator/hero/hero.dart';
 import 'package:god_king_castle_calculator/hero/tier.dart';
 import 'package:god_king_castle_calculator/widget/kgc_form.dart';
-
-import '../../hero/hero.dart';
 
 class LinkHeroPreset {
   LinkingHero? hero;
@@ -15,7 +13,7 @@ class LinkHeroPreset {
 class LinkHeroPresetWidget extends StatefulWidget {
   final void Function(LinkHeroPreset val) _onChange;
 
-  LinkHeroPresetWidget(this._onChange, {super.key});
+  const LinkHeroPresetWidget(this._onChange, {super.key});
 
   @override
   State<LinkHeroPresetWidget> createState() => _LinkHeroPresetWidgetState();
@@ -25,7 +23,7 @@ class _LinkHeroPresetWidgetState extends State<LinkHeroPresetWidget> {
   final TextEditingController _bufferGuardController =
       TextEditingController(text: '0');
 
-  LinkHeroPreset preset = LinkHeroPreset();
+  final LinkHeroPreset _preset = LinkHeroPreset();
 
   @override
   Widget build(BuildContext context) {
@@ -34,11 +32,10 @@ class _LinkHeroPresetWidgetState extends State<LinkHeroPresetWidget> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           KgcFormFactory.createHeroTierSelector(
-              value: preset.tier,
+              value: _preset.tier,
               onchange: (newTier) {
-                preset.tier = newTier;
-                print('Preset hash ${preset.hashCode}');
-                widget._onChange(preset);
+                _preset.tier = newTier;
+                widget._onChange(_preset);
               }),
           const SizedBox(width: 10),
           DropdownButton(
@@ -46,21 +43,16 @@ class _LinkHeroPresetWidgetState extends State<LinkHeroPresetWidget> {
                 .where((c) => c.value is LinkingHero)
                 .map(
                   (entry) => DropdownMenuItem(
-                    value: entry.value,
+                    value: entry.value as LinkingHero,
                     child: Text(entry.value.name),
                   ),
                 )
                 .toList()
               ..add(const DropdownMenuItem(child: Text("none"))),
-            value: preset.hero,
-            onChanged: (hero_domain.Hero? selected) {
-              if (selected != null) {
-                preset.hero = selected as LinkingHero;
-              } else {
-                preset.hero = null;
-              }
-
-              widget._onChange(preset);
+            value: _preset.hero,
+            onChanged: (LinkingHero? selected) {
+              _preset.hero = selected;
+              widget._onChange(_preset);
             },
           ),
         ],
@@ -70,14 +62,14 @@ class _LinkHeroPresetWidgetState extends State<LinkHeroPresetWidget> {
         children: [
           const Text("Sacramendum"),
           Checkbox(
-              value: preset.withSacramendum,
+              value: _preset.withSacramendum,
               onChanged: (bool? state) {
-                preset.withSacramendum = state ?? false;
+                _preset.withSacramendum = state ?? false;
 
-                widget._onChange(preset);
+                widget._onChange(_preset);
               }),
           Visibility(
-            visible: preset.withSacramendum,
+            visible: _preset.withSacramendum,
             child: SizedBox(
               width: 55,
               child: TextField(
@@ -90,7 +82,7 @@ class _LinkHeroPresetWidgetState extends State<LinkHeroPresetWidget> {
                 ),
                 onChanged: (String? newValue) {
                   // TODO guard level
-                  widget._onChange(preset);
+                  widget._onChange(_preset);
                 },
               ),
             ),
