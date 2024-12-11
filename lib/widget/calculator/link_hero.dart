@@ -6,36 +6,14 @@ import 'package:god_king_castle_calculator/widget/kgc_form.dart';
 
 import '../../hero/hero.dart';
 
-class LinkHeroPreset extends ChangeNotifier {
-  LinkingHero? _hero;
-  HeroTier _tier = HeroTier.T1;
-  bool _withSacramendum = false;
-
-  LinkingHero? get hero => _hero;
-
-  set hero(LinkingHero? value) {
-    _hero = value;
-    notifyListeners();
-  }
-
-  HeroTier get tier => _tier;
-
-  set tier(HeroTier value) {
-    _tier = value;
-    notifyListeners();
-  }
-
-  bool get withSacramendum => _withSacramendum;
-
-  set withSacramendum(bool value) {
-    _withSacramendum = value;
-    notifyListeners();
-  }
+class LinkHeroPreset {
+  LinkingHero? hero;
+  HeroTier tier = HeroTier.T1;
+  bool withSacramendum = false;
 }
 
 class LinkHeroPresetWidget extends StatefulWidget {
   final void Function(LinkHeroPreset val) _onChange;
-
 
   LinkHeroPresetWidget(this._onChange, {super.key});
 
