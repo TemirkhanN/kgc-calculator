@@ -14,8 +14,13 @@ class BaseStats {
 }
 
 class Stats extends BaseStats {
-  const Stats(super.hp, super.attack, super.spellPower, super.attackSpeed,
-      {super.attackCount});
+  const Stats(
+    super.hp,
+    super.attack,
+    super.spellPower,
+    super.attackSpeed, {
+    super.attackCount,
+  });
 
   Stats sum(Stats withStats) {
     return Stats(
@@ -127,6 +132,7 @@ class Hero {
   static const String bonusEquipment = "equipment";
   static const String bonusFacility = "facility";
   static const String bonusRelic = "relic";
+  static const String bonusAccessory = "accessory";
 
   final String name;
   final HeroTier tier;
@@ -151,6 +157,10 @@ class Hero {
 
   void setFacilityBonus(StatBooster bonus) {
     _statsBoosters[bonusFacility] = bonus;
+  }
+
+  void setAccessoryBonus(StatBooster bonus) {
+    _statsBoosters[bonusAccessory] = bonus;
   }
 
   // TODO we don't merge items here, while we should
@@ -217,6 +227,8 @@ class Hero {
 
 class LinkingHero extends Hero {
   final List<LinkEffect> _linkBuff;
+  bool _withSacramentum = false;
+  double _statGuard = 0.0;
 
   LinkingHero(super.name, super.baseStats, this._linkBuff, {super.tier});
 
@@ -229,16 +241,40 @@ class LinkingHero extends Hero {
     return hero;
   }
 
+  void withSacramentum(bool uses, double statGuard) {
+    _withSacramentum = uses;
+    _statGuard = statGuard;
+  }
+
   void buff(Hero target) {
     LinkEffect buff =
         _linkBuff.firstWhere((boost) => boost.skillTier == tier.toSkillTier());
 
-    var myRawStats = tier.applyToStats(target.baseStats);
+    var targetBaseStats = target.baseStats;
+    var myOwnStatsBonus = Stats(0, 0, 0, 0);
+
+    if (_withSacramentum) {
+      const baseSacraEffect = 0.15;
+      var finalSacraEffect =
+          baseSacraEffect + (_statGuard * 0.06 * baseSacraEffect);
+
+      myOwnStatsBonus = StatBooster.combine([..._statsBoosters.values])
+          .applyTo(tier.applyToStats(baseStats));
+
+      myOwnStatsBonus = Stats(
+          myOwnStatsBonus.hp,
+          (myOwnStatsBonus.attack * finalSacraEffect).round(),
+          (myOwnStatsBonus.spellPower * finalSacraEffect).round(),
+          myOwnStatsBonus.attackSpeed);
+    }
+
+    var myRawStats = tier.applyToStats(targetBaseStats);
     // Beware, if at some point some hero starts buffing attack speed, this needs to be adjusted
     var myBoostedStats =
         StatBooster.combine([..._statsBoosters.values]).applyTo(myRawStats);
-    var bonusStats =
-        StatBooster.combine([buff.statsBonus]).calculateBonus(myBoostedStats);
+    var bonusStats = StatBooster.combine([buff.statsBonus])
+        .calculateBonus(myBoostedStats)
+        .sum(myOwnStatsBonus);
 
     // Some characters have many attacks and providing them full buff
     // means easily breaking game balance. Hence, they receive boost proportionally

@@ -7,7 +7,8 @@ import 'package:god_king_castle_calculator/widget/kgc_form.dart';
 class LinkHeroPreset {
   LinkingHero? hero;
   HeroTier tier = HeroTier.T1;
-  bool withSacramendum = false;
+  bool withSacramentum = false;
+  double guard = 0;
 }
 
 class LinkHeroPresetWidget extends StatefulWidget {
@@ -60,16 +61,16 @@ class _LinkHeroPresetWidgetState extends State<LinkHeroPresetWidget> {
       Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text("Sacramendum"),
+          const Text("Sacramentum"),
           Checkbox(
-              value: _preset.withSacramendum,
+              value: _preset.withSacramentum,
               onChanged: (bool? state) {
-                _preset.withSacramendum = state ?? false;
+                _preset.withSacramentum = state ?? false;
 
                 widget._onChange(_preset);
               }),
           Visibility(
-            visible: _preset.withSacramendum,
+            visible: _preset.withSacramentum,
             child: SizedBox(
               width: 55,
               child: TextField(
@@ -81,7 +82,9 @@ class _LinkHeroPresetWidgetState extends State<LinkHeroPresetWidget> {
                   counterText: '',
                 ),
                 onChanged: (String? newValue) {
-                  // TODO guard level
+                  newValue ??= '0';
+                  _preset.guard = double.tryParse(newValue) ?? 0.0;
+
                   widget._onChange(_preset);
                 },
               ),

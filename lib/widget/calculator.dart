@@ -119,6 +119,10 @@ class _CalculatorState extends State<Calculator> {
     if (_buffer.hero != null) {
       var newbuffer = _buffer.hero!.ofTier(_buffer.tier);
       newbuffer.setFacilityBonus(facilityBooster);
+      // TODO implement accessory bonus and etc.
+      // newbuffer.setAccessoryBonus(accessoryBonus);
+      newbuffer.withSacramentum(_buffer.withSacramentum, _buffer.guard);
+
       newbuffer.buff(adjustedHero);
     }
 
