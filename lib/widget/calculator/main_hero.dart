@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:god_king_castle_calculator/data.dart';
 import 'package:god_king_castle_calculator/hero/hero.dart' as hero_domain;
 import 'package:god_king_castle_calculator/hero/tier.dart';
-import 'package:god_king_castle_calculator/widget/kgc_form.dart';
+import 'package:god_king_castle_calculator/widget/calculator/tier_selector.dart';
 
 class MainHeroPreset {
   hero_domain.Hero? hero;
@@ -30,12 +30,13 @@ class _MainHeroPresetWidgetState extends State<MainHeroPresetWidget> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          KgcFormFactory.createHeroTierSelector(
-              value: _preset.tier,
-              onchange: (HeroTier newTier) {
-                _preset.tier = newTier;
-                widget._onChange(_preset);
-              }),
+          HeroTierSelector(
+            tier: _preset.tier,
+            onchange: (newTier) {
+              _preset.tier = newTier;
+              widget._onChange(_preset);
+            },
+          ),
           const SizedBox(width: 10),
           DropdownButton(
             items: characters.entries

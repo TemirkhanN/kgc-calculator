@@ -251,7 +251,7 @@ class LinkingHero extends Hero {
         _linkBuff.firstWhere((boost) => boost.skillTier == tier.toSkillTier());
 
     var targetBaseStats = target.baseStats;
-    var myOwnStatsBonus = Stats(0, 0, 0, 0);
+    var myOwnStatsBonus = const Stats(0, 0, 0, 0);
 
     if (_withSacramentum) {
       const baseSacraEffect = 0.15;
@@ -285,13 +285,15 @@ class LinkingHero extends Hero {
       attackDistributionDelta = 1;
     }
 
-    target.buffStats(Stats(
-      0,
-      (bonusStats.attack / attackDistributionDelta).round(),
-      bonusStats.spellPower,
-      0,
-      attackCount: 0,
-    ));
+    target.buffStats(
+      Stats(
+        0,
+        (bonusStats.attack / attackDistributionDelta).round(),
+        bonusStats.spellPower,
+        0,
+        attackCount: 0,
+      ),
+    );
   }
 }
 

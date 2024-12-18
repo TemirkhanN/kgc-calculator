@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:god_king_castle_calculator/data/equipment_repository.dart';
 import 'package:god_king_castle_calculator/hero/equipment.dart';
 import 'package:god_king_castle_calculator/hero/tier.dart';
-import 'package:god_king_castle_calculator/widget/kgc_form.dart';
 
 class EquipmentCreator extends StatefulWidget {
   const EquipmentCreator({super.key});
@@ -54,8 +53,14 @@ class _EquipmentCreatorState extends State<EquipmentCreator> {
             },
             hint: const Text("Edit existing"),
           ),
-          KgcFormFactory.createTierSelector(
-              value: _tier, onchange: _setEquipmentTier),
+          DropdownButton(
+            items: Tier.values
+                .map((entry) =>
+                    DropdownMenuItem(value: entry, child: Text(entry.name)))
+                .toList(growable: false),
+            value: _tier,
+            onChanged: (newValue) => _setEquipmentTier(newValue!),
+          ),
           DropdownButton(
               value: _type,
               hint: const Text("Item type"),
