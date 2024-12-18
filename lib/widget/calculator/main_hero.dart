@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:god_king_castle_calculator/data.dart';
+import 'package:god_king_castle_calculator/data/hero_repository.dart';
 import 'package:god_king_castle_calculator/hero/hero.dart' as hero_domain;
 import 'package:god_king_castle_calculator/hero/tier.dart';
 import 'package:god_king_castle_calculator/widget/calculator/tier_selector.dart';
@@ -10,6 +10,7 @@ class MainHeroPreset {
 }
 
 class MainHeroPresetWidget extends StatefulWidget {
+  final HeroRepository heroRepository = const HeroRepository();
   final void Function(MainHeroPreset val) _onChange;
 
   const MainHeroPresetWidget(this._onChange, {super.key});
@@ -39,10 +40,12 @@ class _MainHeroPresetWidgetState extends State<MainHeroPresetWidget> {
           ),
           const SizedBox(width: 10),
           DropdownButton(
-            items: characters.entries
-                .where((c) => c.value is! hero_domain.LinkingHero)
-                .map((entry) => DropdownMenuItem(
-                    value: entry.value, child: Text(entry.value.name)))
+            items: widget.heroRepository
+                .listStandardHeroes()
+                .map(
+                  (entry) =>
+                      DropdownMenuItem(value: entry, child: Text(entry.name)),
+                )
                 .toList(growable: false),
             value: _preset.hero,
             onChanged: (hero_domain.Hero? selected) {

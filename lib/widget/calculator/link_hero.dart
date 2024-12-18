@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:god_king_castle_calculator/data.dart';
+import 'package:god_king_castle_calculator/data/hero_repository.dart';
 import 'package:god_king_castle_calculator/hero/hero.dart';
 import 'package:god_king_castle_calculator/hero/tier.dart';
 import 'package:god_king_castle_calculator/widget/calculator/tier_selector.dart';
@@ -12,6 +12,7 @@ class LinkHeroPreset {
 }
 
 class LinkHeroPresetWidget extends StatefulWidget {
+  final HeroRepository heroRepository = const HeroRepository();
   final void Function(LinkHeroPreset val) _onChange;
 
   const LinkHeroPresetWidget(this._onChange, {super.key});
@@ -41,12 +42,12 @@ class _LinkHeroPresetWidgetState extends State<LinkHeroPresetWidget> {
           ),
           const SizedBox(width: 10),
           DropdownButton(
-            items: characters.entries
-                .where((c) => c.value is LinkingHero)
+            items: widget.heroRepository
+                .listStandardLinkingHeroes()
                 .map(
                   (entry) => DropdownMenuItem(
-                    value: entry.value as LinkingHero,
-                    child: Text(entry.value.name),
+                    value: entry,
+                    child: Text(entry.name),
                   ),
                 )
                 .toList()

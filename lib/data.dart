@@ -2,6 +2,8 @@ import 'package:god_king_castle_calculator/hero/hero.dart';
 import 'package:god_king_castle_calculator/hero/skill.dart';
 import 'package:god_king_castle_calculator/hero/tier.dart';
 
+// TODO deprecated. replace with data/HeroRepository
+
 enum CharacterName {
   lunaire,
   saras,
