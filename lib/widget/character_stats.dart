@@ -5,8 +5,6 @@ import 'package:god_king_castle_calculator/hero/equipment.dart';
 import 'package:god_king_castle_calculator/hero/hero.dart' as hero_domain;
 import 'package:god_king_castle_calculator/hero/tier.dart';
 
-import '../data.dart';
-
 class StatsWidget extends StatelessWidget {
   static const StatsWidget empty =
       StatsWidget("", hero_domain.Stats(0, 0, 0, 0));
@@ -242,7 +240,7 @@ class _HeroDamageEstimator {
 
 extension _HeroSkillAmplifier on hero_domain.Hero {
   _Amplifier getDamageAmplifier() {
-    if (CharacterName.sargula.get() == this) {
+    if (name.toLowerCase() == "sargula") {
       var spellStatBoost = getFinalStats().spellPower / 16.66;
       switch (tier.toSkillTier()) {
         case Tier.T1:
@@ -260,13 +258,13 @@ extension _HeroSkillAmplifier on hero_domain.Hero {
       }
     }
 
-    if (CharacterName.mel.get() == this) {
+    if (name.toLowerCase() == "mel") {
       var spellStatBoost = getFinalStats().spellPower / 50;
       return _XDamageEveryYAttackAmplifier(
           1, RatioModifier((225 + spellStatBoost) / 100));
     }
 
-    if (CharacterName.ian.get() == this) {
+    if (name.toLowerCase() == "ian") {
       var ianAmplifier = _SequentialAmplifier();
       double spellStatBoost = (getFinalStats().spellPower / 10) / 100;
 

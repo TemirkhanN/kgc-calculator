@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:god_king_castle_calculator/data.dart';
+import 'package:god_king_castle_calculator/data/hero_repository.dart';
 import 'package:god_king_castle_calculator/hero/hero.dart' as hero_domain;
 import 'package:god_king_castle_calculator/hero/tier.dart';
 import 'package:god_king_castle_calculator/main.dart';
 import 'package:god_king_castle_calculator/widget/linkbuff_stat_calculator.dart';
 
 class LinkedStatsMatrix extends StatelessWidget {
+  final HeroRepository _heroRepository = const HeroRepository();
   const LinkedStatsMatrix({super.key});
 
   @override
   Widget build(BuildContext context) {
-    var chars = characters.entries
-        .where((elem) => elem.value is! hero_domain.LinkingHero)
-        .toList();
+    var chars = _heroRepository.listStandardHeroes().toList();
     hero_domain.LinkingHero supportCharacter =
-        characters[CharacterName.lunaire] as hero_domain.LinkingHero;
+        _heroRepository.listStandardLinkingHeroes().first;
 
     return MaterialApp(
       title: 'KGC Calculator',
@@ -25,7 +24,7 @@ class LinkedStatsMatrix extends StatelessWidget {
               ),
           itemCount: chars.length,
           itemBuilder: (BuildContext context, int index) {
-            var character = chars[index].value;
+            var character = chars[index];
 
             return ElevatedButton(
                 onPressed: () => openPage(

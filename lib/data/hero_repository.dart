@@ -2,6 +2,19 @@ import 'package:god_king_castle_calculator/hero/hero.dart';
 import 'package:god_king_castle_calculator/hero/skill.dart';
 import 'package:god_king_castle_calculator/hero/tier.dart';
 
+// TODO temporary
+enum CharacterName {
+  lunaire,
+  saras,
+  lyca,
+  hansi,
+  sargula,
+  zuoYun,
+  mel,
+  ian,
+  leonhardt
+}
+
 class HeroRepository {
   static final List<Hero> _heroes = List.of([
     Hero("Saras", const BaseStats(885, 148, 41, 100)),
@@ -28,5 +41,9 @@ class HeroRepository {
 
   Iterable<LinkingHero> listStandardLinkingHeroes() {
     return _heroes.whereType<LinkingHero>();
+  }
+
+  Hero getByName(CharacterName name) {
+    return _heroes.firstWhere((c) => c.name.toLowerCase() == name.name);
   }
 }
