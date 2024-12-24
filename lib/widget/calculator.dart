@@ -5,6 +5,7 @@ import 'package:god_king_castle_calculator/hero/hero.dart' as hero_domain;
 import 'package:god_king_castle_calculator/main.dart';
 import 'package:god_king_castle_calculator/widget/calculator/link_hero.dart';
 import 'package:god_king_castle_calculator/widget/calculator/main_hero.dart';
+import 'package:god_king_castle_calculator/widget/calculator/relic_stat_bonus.dart';
 import 'package:god_king_castle_calculator/widget/character_stats.dart';
 import 'package:god_king_castle_calculator/widget/creator/equipment_creator.dart';
 
@@ -20,13 +21,6 @@ class Calculator extends StatefulWidget {
 class _CalculatorState extends State<Calculator> {
   static const int maxFacilityBonus = 40;
 
-  final TextEditingController _relicAttackBonusController =
-      TextEditingController(text: '0');
-  final TextEditingController _relicASpeedController =
-      TextEditingController(text: '0');
-  final TextEditingController _relicSpellPowerController =
-      TextEditingController(text: '0');
-
   Map<int, Equipment?> equipmentSlots = {1: null, 2: null, 3: null};
 
   final TextEditingController _critRateController =
@@ -40,6 +34,8 @@ class _CalculatorState extends State<Calculator> {
 
   LinkHeroPreset _buffer = LinkHeroPreset();
   MainHeroPreset _mainHero = MainHeroPreset();
+  hero_domain.StatBooster _damagerRelicBonus = const hero_domain.StatBooster();
+  hero_domain.StatBooster _linkerRelicBonus = const hero_domain.StatBooster();
 
   @override
   Widget build(BuildContext context) {
@@ -59,18 +55,34 @@ class _CalculatorState extends State<Calculator> {
                 });
               },
             ),
+            const Text("Relic bonuses"),
+            RelicStatBonus(
+              (hero_domain.StatBooster bonus) => setState(
+                () {
+                  _linkerRelicBonus = bonus;
+                  _recalculateStats();
+                },
+              ),
+            ),
             const Text("Main hero"),
             MainHeroPresetWidget(
               (MainHeroPreset preset) {
-                setState(() {
-                  _mainHero = preset;
-                  _recalculateStats();
-                });
+                setState(
+                  () {
+                    _mainHero = preset;
+                    _recalculateStats();
+                  },
+                );
               },
             ),
             const SizedBox(height: 10),
             const Text("Relic bonuses"),
-            _relicBonuses(),
+            RelicStatBonus(
+              (hero_domain.StatBooster bonus) => setState(() {
+                _damagerRelicBonus = bonus;
+                _recalculateStats();
+              }),
+            ),
             _critBonuses(),
             const SizedBox(height: 10),
             const Text("Equipment"),
@@ -101,12 +113,7 @@ class _CalculatorState extends State<Calculator> {
         aSpeed: maxFacilityBonus);
     adjustedHero.setFacilityBonus(facilityBooster);
 
-    var relicBooster = hero_domain.StatBooster(
-        attack: int.tryParse(_relicAttackBonusController.text) ?? 0,
-        spell: int.tryParse(_relicSpellPowerController.text) ?? 0,
-        aSpeed: int.tryParse(_relicASpeedController.text) ?? 0);
-
-    adjustedHero.setRelicBonus(relicBooster);
+    adjustedHero.setRelicBonus(_damagerRelicBonus);
 
     // TODO if selected equipment is modified, it will keep old values that were
     // there before modification.
@@ -122,6 +129,7 @@ class _CalculatorState extends State<Calculator> {
       // TODO implement accessory bonus and etc.
       // newbuffer.setAccessoryBonus(accessoryBonus);
       newbuffer.withSacramentum(_buffer.withSacramentum, _buffer.guard);
+      newbuffer.setRelicBonus(_linkerRelicBonus);
 
       newbuffer.buff(adjustedHero);
     }
@@ -198,70 +206,6 @@ class _CalculatorState extends State<Calculator> {
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 label: Text("🗡", style: TextStyle(color: Colors.purple)),
-                counterText: '',
-              ),
-              onChanged: (String? newValue) {
-                setState(() {
-                  _recalculateStats();
-                });
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _relicBonuses() {
-    return Padding(
-      padding: const EdgeInsets.all(10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SizedBox(
-            width: 80,
-            child: TextField(
-              maxLength: 4,
-              controller: _relicAttackBonusController,
-              decoration: const InputDecoration(
-                labelText: "🗡",
-                border: OutlineInputBorder(),
-                counterText: '',
-              ),
-              onChanged: (String? newValue) {
-                setState(() {
-                  _recalculateStats();
-                });
-              },
-            ),
-          ),
-          const SizedBox(width: 10),
-          SizedBox(
-            width: 80,
-            child: TextField(
-              maxLength: 4,
-              controller: _relicSpellPowerController,
-              decoration: const InputDecoration(
-                labelText: "🪄",
-                border: OutlineInputBorder(),
-                counterText: '',
-              ),
-              onChanged: (String? newValue) {
-                setState(() {
-                  _recalculateStats();
-                });
-              },
-            ),
-          ),
-          const SizedBox(width: 10),
-          SizedBox(
-            width: 80,
-            child: TextField(
-              maxLength: 4,
-              controller: _relicASpeedController,
-              decoration: const InputDecoration(
-                labelText: "🏹",
-                border: OutlineInputBorder(),
                 counterText: '',
               ),
               onChanged: (String? newValue) {
